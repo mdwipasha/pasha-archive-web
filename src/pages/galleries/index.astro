@@ -1,0 +1,41 @@
+---
+import Layout from "../../layouts/Layout.astro";
+
+import Navbar from "../../components/Navbar.astro";
+import Footer from "../../components/Footer.astro";
+
+import GallerySection from "../../components/Gallery/GallerySection.jsx";
+
+import { memories } from "../../data/memories";
+---
+
+<Layout title="Gallery | Pasha Archive">
+    <Navbar />
+
+    <div class="grain-overlay"></div>
+
+    <main class="w-full px-6 md:px-16 py-12 md:py-24">
+        <div class="max-w-7xl mx-auto">
+            <div
+                class="mb-16 flex flex-col gap-8 md:flex-row md:justify-between md:items-end"
+            >
+                <div>
+                    <h1
+                        class="font-black text-4xl md:text-[4.5rem] tracking-tight text-[#1c1b1b] mb-4"
+                    >
+                        Gallery
+                    </h1>
+                    <p
+                        class="text-lg md:text-xl leading-relaxed text-[#444748] max-w-3xl"
+                    >
+                        A collection of moments captured across time — and  memories worth keeping.
+                    </p>
+                </div>
+            </div>
+
+            <GallerySection client:load memories={memories} />
+        </div>
+    </main>
+
+    <Footer />
+</Layout>

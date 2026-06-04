@@ -1,0 +1,167 @@
+@import "tailwindcss";
+
+html {
+  scroll-behavior: smooth;
+}
+
+section {
+  scroll-margin-top: 80px;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(0, 0, 0, 0.03), transparent 30%),
+    #f3efe6;
+
+  color: #111111;
+  font-family: 'Inter', sans-serif;
+
+  background-attachment: fixed;
+}
+
+.material-symbols-outlined.filled {
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+::selection {
+  background: #111;
+  color: #fff;
+}
+
+/* Neo Brutalism Utilities */
+
+.neo-card {
+  border: 4px solid black;
+  box-shadow: 10px 10px 0px black;
+  border-radius: 24px;
+}
+
+.neo-button {
+  border: 3px solid black;
+  box-shadow: 6px 6px 0px black;
+  transition: all 0.15s ease;
+}
+
+.neo-button:hover {
+  transform: translate(4px, 4px);
+  box-shadow: 2px 2px 0px black;
+}
+
+.paper-texture {
+  position: relative;
+}
+
+.paper-texture::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  pointer-events: none;
+  background-image:
+    radial-gradient(#000 0.5px, transparent 0.5px);
+  background-size: 10px 10px;
+}
+
+@keyframes fadeIn {
+
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+}
+
+body::before {
+
+  content: "";
+
+  position: fixed;
+
+  inset: 0;
+
+  pointer-events: none;
+
+  opacity: 0.035;
+
+  z-index: 9999;
+
+  background-image:
+    url("https://grainy-gradients.vercel.app/noise.svg");
+
+}
+
+.tape {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-3deg);
+  width: 60px;
+  height: 24px;
+  background-color: rgba(246, 209, 216, 0.8);
+  z-index: 10;
+}
+
+.tape.yellow {
+  background-color: rgba(254, 215, 76, 0.8);
+}
+
+.scrapbook-tape {
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="40" viewBox="0 0 100 40"><path d="M0,10 Q5,0 10,10 T20,10 T30,10 T40,10 T50,10 T60,10 T70,10 T80,10 T90,10 T100,10 L100,30 Q95,40 90,30 T80,30 T70,30 T60,30 T50,30 T40,30 T30,30 T20,30 T10,30 T0,30 Z" fill="black"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="40" viewBox="0 0 100 40"><path d="M0,10 Q5,0 10,10 T20,10 T30,10 T40,10 T50,10 T60,10 T70,10 T80,10 T90,10 T100,10 L100,30 Q95,40 90,30 T80,30 T70,30 T60,30 T50,30 T40,30 T30,30 T20,30 T10,30 T0,30 Z" fill="black"/></svg>');
+}
+
+.tape.blue {
+  background-color: rgba(191, 217, 255, 0.8);
+}
+
+.masonry-grid {
+  column-count: 1;
+  column-gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .masonry-grid {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .masonry-grid {
+    column-count: 3;
+  }
+}
+
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 32px;
+}
+
+.grain-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
