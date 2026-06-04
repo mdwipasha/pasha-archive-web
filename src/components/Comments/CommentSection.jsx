@@ -7,12 +7,19 @@ export default function CommentSection(props) {
   const { memoryId, initialComments = [] } = props;
   const [comments, setComments] = useState(initialComments);
   const [showAllComments, setShowAllComments] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null);
+
+  const parentComments = comments.filter(
+    (comment) => comment.parent_id === null,
+  );
 
   function handleCommentAdded(newComment) {
     setComments((prev) => [newComment, ...prev]);
   }
 
-  const displayedComments = showAllComments ? comments : comments.slice(0, 3);
+  const displayedComments = showAllComments
+    ? parentComments
+    : parentComments.slice(0, 3);
 
   return (
     <div className="space-y-12">
@@ -21,7 +28,41 @@ export default function CommentSection(props) {
       <CommentForm memoryId={memoryId} onCommentAdded={handleCommentAdded} />
 
       {/* COMMENTS */}
+      {replyingTo && (
+        <div
+          className="
+          bg-[#FFFDF8]
+          border-2
+          border-black
+          p-4
+          mb-8
+          shadow-[4px_4px_0_rgba(0,0,0,1)]
+        "
+        >
+          <div className="flex justify-between items-center mb-3">
+            <p className="text-sm">
+              Replying to <strong>{replyingTo.username}</strong>
+            </p>
 
+            <button
+              onClick={() => setReplyingTo(null)}
+              className="text-xs uppercase"
+            >
+              Cancel
+            </button>
+          </div>
+
+          <CommentForm
+            memoryId={memoryId}
+            parentId={replyingTo.id}
+            onCommentAdded={(newComment) => {
+              handleCommentAdded(newComment);
+
+              setReplyingTo(null);
+            }}
+          />
+        </div>
+      )}
       <section aria-label="Reflections">
         <div className="flex items-center gap-3 mb-6">
           <h2 className="text-sm uppercase tracking-[0.2em] font-semibold">
@@ -39,7 +80,7 @@ export default function CommentSection(props) {
               tabular-nums
             "
           >
-            {comments.length}
+            {parentComments.length}
           </span>
         </div>
 
@@ -57,7 +98,7 @@ export default function CommentSection(props) {
             aria-hidden="true"
           />
 
-          {comments.length === 0 ? (
+          {parentComments.length === 0 ? (
             <div
               className="
                 bg-white
@@ -74,9 +115,17 @@ export default function CommentSection(props) {
           ) : (
             <>
               {displayedComments.map((comment, index) => (
-                <CommentCard key={comment.id} comment={comment} index={index} />
+                <CommentCard
+                  key={comment.id}
+                  comment={comment}
+                  index={index}
+                  replies={comments.filter(
+                    (reply) => reply.parent_id === comment.id,
+                  )}
+                  onReply={setReplyingTo}
+                />
               ))}
-              {comments.length > 3 && !showAllComments && (
+              {parentComments.length > 3 && !showAllComments && (
                 <button
                   onClick={() => setShowAllComments(true)}
                   className="
@@ -99,10 +148,10 @@ export default function CommentSection(props) {
                     hover:shadow-none
                   "
                 >
-                  View More ({comments.length - 3} more)
+                  View More ({parentComments.length - 3} more)
                 </button>
               )}
-              {showAllComments && comments.length > 3 && (
+              {showAllComments && parentComments.length > 3 && (
                 <button
                   onClick={() => setShowAllComments(false)}
                   className="

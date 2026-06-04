@@ -13,7 +13,7 @@ export default function GalleryCard({ memory, index = 0 }) {
     "aspect-video",
     "aspect-square",
   ];
-  const paddings = ["pb-10", "pb-14", "pb-8", "pb-12", "pb-8", "pb-14"];
+  const paddings = ["pb-10", "pb-12", "pb-8", "pb-10", "pb-8", "pb-12"];
   const tapeVariants = ["", "yellow", "blue", "", "blue", "yellow"];
 
   const tagColors = [
@@ -62,7 +62,7 @@ export default function GalleryCard({ memory, index = 0 }) {
           <div className="flex justify-between items-start gap-3">
             <div>
               <h3 className="font-black text-xl mb-1">{memory.title}</h3>
-              <p className="text-[12px] uppercase tracking-[0.05em] font-semibold text-[#6B7280]">
+              <p className="text-[14px] uppercase tracking-[0.05em] font-semibold text-[#6B7280]">
                 {memory.year}
               </p>
             </div>

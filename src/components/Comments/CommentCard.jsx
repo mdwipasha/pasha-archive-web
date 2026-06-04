@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const avatarColors = [
   "bg-[#FFD6A5]",
   "bg-[#FDFFB6]",
@@ -35,7 +37,8 @@ function getInitials(name) {
     .toUpperCase();
 }
 
-export default function CommentCard({ comment, index }) {
+export default function CommentCard({ comment, index, replies = [], onReply }) {
+  const [showReplies, setShowReplies] = useState(false);
   return (
     <article className="group relative">
       <div
@@ -84,6 +87,74 @@ export default function CommentCard({ comment, index }) {
         <p className="text-base leading-relaxed text-[#111111] whitespace-pre-wrap wrap-break-word">
           {comment.comment}
         </p>
+
+        <div className="flex items-center gap-4 mt-4">
+          <button
+            onClick={() => onReply(comment)}
+            className="
+            text-xs
+            uppercase
+            tracking-[0.15em]
+            font-bold
+            hover:underline
+          "
+          >
+            ↩ Reply
+          </button>
+
+          {replies.length > 0 && (
+            <button
+              onClick={() => setShowReplies(!showReplies)}
+              className="
+              text-xs
+              uppercase
+              tracking-[0.15em]
+              text-slate-500
+              hover:underline
+            "
+            >
+              {showReplies
+                ? "Hide replies"
+                : `View ${replies.length} repl${
+                    replies.length > 1 ? "ies" : "y"
+                  }`}
+            </button>
+          )}
+        </div>
+        {showReplies && replies.length > 0 && (
+          <div
+            className="
+            mt-5
+            ml-6
+            pl-5
+            border-l-2
+          border-black/20
+            space-y-4
+          "
+          >
+            {replies.map((reply) => (
+              <div
+                key={reply.id}
+                className="
+              bg-[#FFFDF8]
+                border-2
+              border-black
+                p-4
+              "
+              >
+                <div className="mb-2">
+                  <p className="font-semibold text-sm">{reply.username}</p>
+
+                  <time className="text-[10px] uppercase tracking-[0.15em] text-slate-500">
+                    {formatDate(reply.created_at)}
+                  </time>
+                </div>
+
+                <p className="text-sm whitespace-pre-wrap">{reply.comment}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </article>
   );

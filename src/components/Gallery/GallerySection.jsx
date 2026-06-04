@@ -1,6 +1,24 @@
 import { useMemo, useState } from "react";
 import GalleryCard from "./GalleryCard";
 
+const getMemoryTimestamp = (memory) => {
+  if (memory.date) {
+    const parsed = Date.parse(memory.date);
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
+  }
+
+  if (memory.year) {
+    const parsedYear = Date.parse(`${memory.year}-01-01`);
+    if (!Number.isNaN(parsedYear)) {
+      return parsedYear;
+    }
+  }
+
+  return 0;
+};
+
 export default function GallerySection({ memories }) {
   const [selectedTag, setSelectedTag] = useState("all");
   const [visibleCount, setVisibleCount] = useState(6);
@@ -10,12 +28,16 @@ export default function GallerySection({ memories }) {
     return ["all", ...new Set(allTags)];
   }, [memories]);
 
+  const sortedMemories = useMemo(() => {
+    return [...memories].sort((a, b) => getMemoryTimestamp(b) - getMemoryTimestamp(a));
+  }, [memories]);
+
   const filteredMemories = useMemo(() => {
     if (selectedTag === "all") {
-      return memories;
+      return sortedMemories;
     }
-    return memories.filter((memory) => memory.tags.includes(selectedTag));
-  }, [selectedTag, memories]);
+    return sortedMemories.filter((memory) => memory.tags.includes(selectedTag));
+  }, [selectedTag, sortedMemories]);
 
   const visibleMemories = filteredMemories.slice(0, visibleCount);
 

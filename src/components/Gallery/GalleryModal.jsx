@@ -120,7 +120,7 @@ export default function GalleryModal({ memory, onClose }) {
   }, [visitorId, memory.id]);
 
   return (
-    <div className="fixed inset-0 z-[9999] flex justify-center items-center p-4 md:p-8 bg-black/50 backdrop-blur-sm">
+    <div className="overflow-y-auto scrollbar-hide fixed inset-0 z-[9999] flex justify-center items-center p-4 md:p-8 bg-black/50 backdrop-blur-sm">
       <button className="absolute inset-0 z-0" onClick={onClose} />
 
       <div className="relative z-10 w-full max-w-5xl bg-[#FFFDF8] border-2 border-black shadow-[8px_8px_0_rgba(0,0,0,1)] p-6 md:p-8 rotate-[0.5deg] max-h-[90vh] overflow-y-auto">
@@ -213,7 +213,7 @@ export default function GalleryModal({ memory, onClose }) {
                 <p className="text-[10px] uppercase tracking-[0.05em] font-semibold text-[#6B7280] mb-2">
                   People in Frame
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {memory.people.map((person, index) =>
                     person.social ? (
                       <a

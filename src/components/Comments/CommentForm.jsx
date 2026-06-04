@@ -5,6 +5,7 @@ import CommentToast from "./CommentToast";
 export default function CommentForm({
   memoryId,
   onCommentAdded,
+  parentId = null,
 }) {
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
@@ -36,10 +37,7 @@ export default function CommentForm({
     const body = comment.trim();
 
     if (!body) {
-      showToast(
-        "Please write a reflection before posting.",
-        false
-      );
+      showToast("Please write a reflection before posting.", false);
       return;
     }
 
@@ -52,6 +50,7 @@ export default function CommentForm({
           memory_id: memoryId,
           username,
           comment: body,
+          parent_id: parentId,
         })
         .select()
         .single();
@@ -67,21 +66,14 @@ export default function CommentForm({
     } catch (error) {
       console.error(error);
 
-      showToast(
-        error?.message ||
-          "Unable to post comment.",
-        false
-      );
+      showToast(error?.message || "Unable to post comment.", false);
     } finally {
       setLoading(false);
     }
   }
 
   function handleKeyDown(e) {
-    if (
-      (e.ctrlKey || e.metaKey) &&
-      e.key === "Enter"
-    ) {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
       handleSubmit();
     }
   }
@@ -106,9 +98,7 @@ export default function CommentForm({
             shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)]
           "
         >
-          <span className="material-symbols-outlined text-base">
-            edit
-          </span>
+          <span className="material-symbols-outlined text-base">edit</span>
         </div>
 
         <div
@@ -138,9 +128,7 @@ export default function CommentForm({
             maxLength={60}
             autoComplete="name"
             value={name}
-            onChange={(e) =>
-              setName(e.target.value)
-            }
+            onChange={(e) => setName(e.target.value)}
             placeholder="Your name (optional)"
             className="
               w-full
@@ -173,9 +161,7 @@ export default function CommentForm({
             rows={4}
             maxLength={500}
             value={comment}
-            onChange={(e) =>
-              setComment(e.target.value)
-            }
+            onChange={(e) => setComment(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Write your reflection here…"
             className="
@@ -217,9 +203,7 @@ export default function CommentForm({
               disabled:pointer-events-none
             "
           >
-            {loading
-              ? "Posting..."
-              : "Post Comment"}
+            {loading ? "Posting..." : "Post Comment"}
           </button>
         </div>
       </section>

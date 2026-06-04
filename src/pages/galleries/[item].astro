@@ -9,7 +9,7 @@ import { supabase } from "../../lib/supabase";
 
 export function getStaticPaths() {
   return memories.map((item) => ({
-    params: { item: item.slug }
+    params: { item: item.slug },
   }));
 }
 
@@ -22,13 +22,14 @@ if (!data) {
 
 const { data: commentsRes } = await supabase
   .from("memory_comments")
-  .select("id, memory_id, username, comment, created_at")
+  .select("id, memory_id, username, comment, created_at, parent_id")
   .eq("memory_id", data.id)
   .order("created_at", {
-    ascending: false,
+    ascending: true,
   });
 
 const comments = commentsRes ?? [];
+
 ---
 
 <Layout title={`${data.title} | Pasha Archive`}>
