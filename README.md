@@ -1,46 +1,89 @@
-# Astro Starter Kit: Basics
+# Pasha Archive
 
-```sh
-npm create astro@latest -- --template basics
+A personal digital scrapbook built to preserve moments, stories, and experiences in one place.
+
+## 🌟 About The Project
+
+Memories is a personal gallery website designed to document meaningful moments through photos and stories. Instead of letting memories get lost in device storage, this project turns them into a beautiful and interactive timeline that can be revisited anytime.
+
+The goal of this project is simple: **capture moments, tell stories, and keep memories alive.**
+
+## ✨ Features
+
+### 🖼️ Gallery Collection
+
+* Browse memories through a clean gallery layout.
+* View photos and stories in detail.
+* Responsive experience across desktop and mobile devices.
+
+### ❤️ Community Interaction
+
+* Like memorable moments.
+* Leave comments and share thoughts.
+* Real-time interaction powered by Supabase.
+
+### 🔍 Discover Memories
+
+* Search memories quickly.
+* Filter by categories and tags.
+* Explore different moments with ease.
+
+### 📱 Modern Experience
+
+* Fully responsive design.
+* Smooth animations and transitions.
+* Fast page loading with Astro.
+
+## 🛠 Tech Stack
+
+### Frontend
+
+* Astro
+* React
+* Tailwind CSS
+* Motion
+
+### Backend & Database
+
+* Supabase
+
+  * PostgreSQL Database
+  * Realtime
+  * Row Level Security (RLS)
+
+## 🚀 Getting Started
+
+Clone the repository:
+
+```bash
+git clone https://github.com/mdwipasha/pasha-archive-web.git
+cd pasha-archive-web
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Install dependencies:
 
-## 🚀 Project Structure
+```bash
+npm install
+```
 
-Inside of your Astro project, you'll see the following folders and files:
+Create a `.env` file:
+
+```env
+PUBLIC_SUPABASE_URL=your_supabase_url
+PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Open:
 
 ```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+http://localhost:4321
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## 
+Created by <a href="https://instagram.com/mdpashaaa">Capa<a/> as a personal project to document life's.
