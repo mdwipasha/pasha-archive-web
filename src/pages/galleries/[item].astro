@@ -25,7 +25,7 @@ const { data: commentsRes } = await supabase
   .select("id, memory_id, username, comment, created_at, parent_id")
   .eq("memory_id", data.id)
   .order("created_at", {
-    ascending: true,
+    ascending: false,
   });
 
 const comments = commentsRes ?? [];

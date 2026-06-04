@@ -10,7 +10,7 @@ export default function CommentSection(props) {
   const [replyingTo, setReplyingTo] = useState(null);
 
   const parentComments = comments.filter(
-    (comment) => comment.parent_id === null,
+    (comment) => comment.parent_id === null || comment.parent_id === undefined,
   );
 
   function handleCommentAdded(newComment) {
