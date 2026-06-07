@@ -29,6 +29,7 @@ export type Memory = {
   id: number;
   title: string;
   slug: string;
+  type: "photo" | "video";
   description: string;
   year: string;
   era: string;
@@ -49,6 +50,7 @@ export const memories: Memory[] = [
     id: 1,
     title: "Untitled",
     slug: "untitled-1",
+    type: "photo",
     description: "Gw yang baju ijoo.",
     date: "",
     year: "2017",
@@ -64,6 +66,7 @@ export const memories: Memory[] = [
     id: 2,
     title: "Untitled",
     slug: "untitled-2",
+    type: "photo",
     description: "Gw yang baju ijo paling kanan.",
     date: "",
     year: "2017",
@@ -79,6 +82,7 @@ export const memories: Memory[] = [
     id: 3,
     title: "Untitled",
     slug: "untitled-3",
+    type: "photo",
     description: "Gw yang baju ijo kedua dari paling belakang.",
     date: "",
     year: "2017",
@@ -94,6 +98,7 @@ export const memories: Memory[] = [
     id: 4,
     title: "Untitled",
     slug: "untitled-4",
+    type: "photo",
     description: "Gw yang baju ijo center of the world.",
     date: "",
     year: "2017",
@@ -109,6 +114,7 @@ export const memories: Memory[] = [
     id: 5,
     title: "Untitled",
     slug: "untitled-5",
+    type: "photo",
     description: "Gw yang baju ijo arah jam 10.30.",
     date: "",
     year: "2017",
@@ -128,6 +134,7 @@ export const memories: Memory[] = [
     id: 6,
     title: "Untitled",
     slug: "Untitled-6",
+    type: "photo",
     description: "udah keren dari kecil.",
     date: "",
     year: "2015",
@@ -143,6 +150,7 @@ export const memories: Memory[] = [
     id: 7,
     title: "Untitled",
     slug: "Untitled-7",
+    type: "photo",
     description: "aku suka timnas.",
     date: "",
     year: "2015",
@@ -162,6 +170,7 @@ export const memories: Memory[] = [
     id: 8,
     title: "Untitled",
     slug: "Untitled-8",
+    type: "photo",
     description: "aku kedua dari sebelah kiri abis jadi penari yamko rambe yamko.",
     date: "",
     year: "2019",
@@ -171,6 +180,22 @@ export const memories: Memory[] = [
     tags: [tags.school.tag, tags.friends.tag],
     featured: true,
     people: [people.me, people.friends],
+  },
+
+  {
+    id: 9,
+    title: "Test Video",
+    slug: "Untitled-9",
+    type: "video",
+    description: "aku kedua dari sebelah kiri abis jadi penari yamko rambe yamko.",
+    date: "",
+    year: "2019",
+    era: "",
+    location: "Bogor, Indonesia",
+    image: "/test.mp4",
+    tags: [tags.school.tag, tags.friends.tag],
+    featured: true,
+    people: [people.me, people.juli, people.ajay, people.juli, people.api],
   },
 
 ];

@@ -75,7 +75,7 @@ export default function GallerySection({ memories }) {
               "-rotate-[0.5deg]",
             ][index % 6]}`}
           >
-            <GalleryCard memory={memory} index={index} />
+            <GalleryCard memory={memory} index={index} client:load />
           </div>
         ))}
       </div>
