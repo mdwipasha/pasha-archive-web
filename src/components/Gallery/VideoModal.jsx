@@ -276,6 +276,7 @@ export default function VideoModal({ memory, onClose }) {
                   flex
                   items-center
                   justify-center
+                  cursor-pointer
                 "
               >
                 <span
@@ -331,7 +332,7 @@ export default function VideoModal({ memory, onClose }) {
             "
           >
             <h2 className="font-black text-lg leading-tight mb-1">
-              @mdpashaaa
+              mdpashaaa
             </h2>
 
             <p

@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import Navbar from "../../components/Navbar.astro";
 import Footer from "../../components/Footer.astro";
 import CommentSection from "../../components/Comments/CommentSection.jsx";
+import VideoThumbnail from "../../components/Gallery/VideoThumbnail.jsx";
 
 import { memories } from "../../data/memories";
 import { supabase } from "../../lib/supabase";
@@ -67,17 +68,21 @@ const comments = commentsRes ?? [];
     <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
       <aside class="md:col-span-4 space-y-8">
         <div
-          class="bg-white p-2 border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rotate-[-1.5deg] relative"
+          class="bg-white aspect-square p-2 border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rotate-[-1.5deg] relative"
         >
-          <img
+          {data.type === "video" ? (
+            <VideoThumbnail src={data.image} title={data.title} client:load/>
+          ) : (
+           <img
             src={data.image}
             alt={data.title}
             class="w-full aspect-square object-cover mb-4"
           />
+          )}
 
           <div class="px-2 pb-2">
             <span class="text-[12px] uppercase tracking-[0.2em] text-slate-500">
-              {data.date ?? data.year}
+              {data.date ||  data.year}
             </span>
           </div>
         </div>

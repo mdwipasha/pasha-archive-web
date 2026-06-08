@@ -54,7 +54,7 @@ export default function GalleryCard({ memory, index = 0 }) {
             className={`w-full ${aspectRatios[idx]} bg-[#ebe7e6] border-2 border-black mb-4 overflow-hidden relative`}
           >
             {memory.type === "video" ? (
-              <VideoThumbnail src={memory.src} />
+              <VideoThumbnail src={memory.image} title={memory.title} />
             ) : (
               <img
                 src={memory.image}

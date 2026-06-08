@@ -184,7 +184,7 @@ export default function ImageModal({ memory, onClose }) {
                   <button
                     onClick={handleLike}
                     disabled={liked}
-                    className="flex items-center gap-2 px-3 py-1 bg-white border-2 border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:scale-95 font-title-sm"
+                    className="flex items-center gap-2 px-3 py-1 bg-white border-2 border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:scale-95 font-title-sm cursor-pointer"
                   >
                     <span
                       className={`material-symbols-outlined ${
