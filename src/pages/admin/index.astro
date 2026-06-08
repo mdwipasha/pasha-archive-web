@@ -1,0 +1,12 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import AdminLogin from "../../components/Admin/AdminLogin";
+import Navbar from "../../components/Navbar.astro";
+import Footer from "../../components/Footer.astro";
+---
+
+<Layout title="Admin Login">
+  <Navbar />
+  <AdminLogin client:load />
+  <Footer />
+</Layout>
