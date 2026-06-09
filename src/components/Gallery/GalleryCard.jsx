@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import GalleryModal from "./GalleryModal";
-import VideoThumbnail from "./VideoThumbnail";
 
 export default function GalleryCard({ memory, index = 0 }) {
   const [open, setOpen] = useState(false);
@@ -57,7 +56,7 @@ export default function GalleryCard({ memory, index = 0 }) {
               <img
                 src={memory.thumbnail_url}
                 alt={memory.title}
-                class="w-full h-full object-cover"
+                className="w-full h-full object-cover"
               />
             ) : (
               <img

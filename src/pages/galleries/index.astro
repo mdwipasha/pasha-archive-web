@@ -11,16 +11,16 @@ const { data: memoriesData } = await supabase.from("memories").select("*");
 const { data: memoryTagsData } = await supabase.from("memory_tags").select("memory_id, tag_id");
 const { data: tagsData } = await supabase.from("tags").select("id, tag");
 const { data: memoryPeopleData } = await supabase.from("memory_people").select("memory_id, person_id");
-const { data: peopleData } = await supabase.from("people").select("id, name, social");
+const { data: peopleData } = await supabase.from("people").select("id, name, social_media");
 
 const memoryTags = /** @type {{memory_id:number, tag_id:number}[]} */ (memoryTagsData || []);
 const tagsList = /** @type {{id:number, tag:string}[]} */ (tagsData || []);
 const memoryPeople = /** @type {{memory_id:number, person_id:number}[]} */ (memoryPeopleData || []);
-const peopleList = /** @type {{id:number, name:string, social:string | null}[]} */ (peopleData || []);
+const peopleList = /** @type {{id:number, name:string, social_media:string | null}[]} */ (peopleData || []);
 
 const tagsById = new Map(tagsList.map((tag) => [tag.id, tag.tag]));
 const peopleById = new Map(
-  peopleList.map((person) => [person.id, { name: person.name, social: person.social }]),
+  peopleList.map((person) => [person.id, { name: person.name, social_media: person.social_media }]),
 );
 
 const tagsByMemoryId = new Map();

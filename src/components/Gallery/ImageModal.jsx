@@ -161,7 +161,7 @@ export default function ImageModal({ memory, onClose }) {
                         text-[10px]
                       `}
                     >
-                      {tag}
+                      #{tag}
                     </span>
                   ))}
                 </div>
@@ -214,11 +214,11 @@ export default function ImageModal({ memory, onClose }) {
                   People in Frame
                 </p>
                 <div className="flex flex-wrap gap-1.5">
-                  {(memory.people || []).map((person, index) =>
-                    person.social ? (
+                  {(memory.people || []).map((people, index) =>
+                    people.social_media ? (
                       <a
                         key={index}
-                        href={person.social}
+                        href={people.social_media}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 px-2 py-1 border-2 border-black bg-[#FFFDF8] text-xs font-bold text-black shadow-[2px_2px_0_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
@@ -226,7 +226,7 @@ export default function ImageModal({ memory, onClose }) {
                         <span className="material-symbols-outlined text-[12px]">
                           person
                         </span>
-                        <p className="underline">{person.name}</p>
+                        <p className="underline">{people.name}</p>
                       </a>
                     ) : (
                       // no social link → plain black badge
@@ -237,7 +237,7 @@ export default function ImageModal({ memory, onClose }) {
                         <span className="material-symbols-outlined text-[12px]">
                           person
                         </span>
-                        {person.name}
+                        {people.name}
                       </span>
                     )
                   )}

@@ -331,9 +331,7 @@ export default function VideoModal({ memory, onClose }) {
               text-white
             "
           >
-            <h2 className="font-black text-lg leading-tight mb-1">
-              mdpashaaa
-            </h2>
+            <h2 className="font-black text-lg leading-tight mb-1">mdpashaaa</h2>
 
             <p
               className={`text-xs leading-relaxed ${
@@ -366,10 +364,10 @@ export default function VideoModal({ memory, onClose }) {
 
                   <div className="flex flex-wrap gap-2">
                     {visiblePeople.map((person, index) =>
-                      person.social ? (
+                      person.social_media ? (
                         <a
                           key={index}
-                          href={person.social}
+                          href={person.social_media}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="
@@ -487,10 +485,10 @@ export default function VideoModal({ memory, onClose }) {
 
                       <div className="flex flex-col gap-2 max-h-[50vh] overflow-y-auto">
                         {(memory.people || []).map((person, index) =>
-                          person.social ? (
+                          person.social_media ? (
                             <a
                               key={index}
-                              href={person.social}
+                              href={person.social_media}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="
