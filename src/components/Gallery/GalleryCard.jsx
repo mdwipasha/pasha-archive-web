@@ -53,11 +53,15 @@ export default function GalleryCard({ memory, index = 0 }) {
           <div
             className={`w-full ${aspectRatios[idx]} bg-[#ebe7e6] border-2 border-black mb-4 overflow-hidden relative`}
           >
-            {memory.type === "video" ? (
-              <VideoThumbnail src={memory.image} title={memory.title} />
+            {memory.type === "Video" ? (
+              <img
+                src={memory.thumbnail_url}
+                alt={memory.title}
+                class="w-full h-full object-cover"
+              />
             ) : (
               <img
-                src={memory.image}
+                src={memory.src}
                 alt={memory.title}
                 className="w-full h-full object-cover"
               />
@@ -72,7 +76,7 @@ export default function GalleryCard({ memory, index = 0 }) {
               </p>
             </div>
             <div className="flex flex-wrap gap-1 justify-end max-w-[50%]">
-              {memory.tags.slice(0, 3).map((tag) => (
+              {(memory.tags || []).slice(0, 3).map((tag) => (
                 <span
                   key={tag}
                   className={`
@@ -92,7 +96,7 @@ export default function GalleryCard({ memory, index = 0 }) {
                 </span>
               ))}
 
-              {memory.tags.length > 3 && (
+              {(memory.tags || []).length > 3 && (
                 <span
                   className="
                   inline-block
@@ -107,8 +111,8 @@ export default function GalleryCard({ memory, index = 0 }) {
                   tracking-[0.05em]
                 "
                 >
-                  +{memory.tags.length - 3} other
-                  {memory.tags.length - 3 > 1 ? "s" : ""}
+                  +{(memory.tags || []).length - 3} other
+                  {(memory.tags || []).length - 3 > 1 ? "s" : ""}
                 </span>
               )}
             </div>
@@ -119,7 +123,7 @@ export default function GalleryCard({ memory, index = 0 }) {
       {open &&
         createPortal(
           <GalleryModal memory={memory} onClose={() => setOpen(false)} />,
-          document.body
+          document.body,
         )}
     </>
   );

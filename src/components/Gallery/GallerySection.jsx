@@ -24,7 +24,7 @@ export default function GallerySection({ memories }) {
   const [visibleCount, setVisibleCount] = useState(6);
 
   const tags = useMemo(() => {
-    const allTags = memories.flatMap((memory) => memory.tags);
+    const allTags = memories.flatMap((memory) => memory.tags || []);
     return ["all", ...new Set(allTags)];
   }, [memories]);
 
@@ -36,7 +36,7 @@ export default function GallerySection({ memories }) {
     if (selectedTag === "all") {
       return sortedMemories;
     }
-    return sortedMemories.filter((memory) => memory.tags.includes(selectedTag));
+    return sortedMemories.filter((memory) => (memory.tags || []).includes(selectedTag));
   }, [selectedTag, sortedMemories]);
 
   const visibleMemories = filteredMemories.slice(0, visibleCount);

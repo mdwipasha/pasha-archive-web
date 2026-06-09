@@ -138,7 +138,7 @@ export default function ImageModal({ memory, onClose }) {
             <img
               alt={memory.title}
               className="w-full h-auto border-2 border-black contrast-125"
-              src={memory.image}
+              src={memory.src}
             />
           </div>
 
@@ -146,7 +146,7 @@ export default function ImageModal({ memory, onClose }) {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <div className="flex flex-wrap gap-2 mb-3">
-                  {memory.tags.map((tag) => (
+                  {(memory.tags || []).map((tag) => (
                     <span
                       key={tag}
                       className={`
@@ -214,7 +214,7 @@ export default function ImageModal({ memory, onClose }) {
                   People in Frame
                 </p>
                 <div className="flex flex-wrap gap-1.5">
-                  {memory.people.map((person, index) =>
+                  {(memory.people || []).map((person, index) =>
                     person.social ? (
                       <a
                         key={index}

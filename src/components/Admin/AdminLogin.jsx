@@ -44,7 +44,7 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
+    <div className="h-screen flex items-center justify-center p-10 overflow-hidden">
       <div className="relative w-full max-w-md">
         {/* Decorative note */}
         <div className="absolute -top-6 -left-6 rotate-[-4deg] border-4 border-black bg-yellow-300 px-4 py-2 shadow-[6px_6px_0px_0px_#000] font-black z-10">

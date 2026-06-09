@@ -222,7 +222,7 @@ export default function VideoModal({ memory, onClose }) {
 
         <div className="relative w-[360px] sm:w-[380px] h-[75vh] sm:h-[90vh] border-2 border-black overflow-hidden bg-black">
           <video
-            src={memory.image}
+            src={memory.src}
             ref={videoRef}
             muted={muted}
             onPause={() => setPaused(true)}
@@ -463,7 +463,7 @@ export default function VideoModal({ memory, onClose }) {
                     >
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="font-black">
-                          People in Frame ({memory.people.length})
+                          People in Frame ({(memory.people || []).length})
                         </h3>
 
                         <button
@@ -486,7 +486,7 @@ export default function VideoModal({ memory, onClose }) {
                       </div>
 
                       <div className="flex flex-col gap-2 max-h-[50vh] overflow-y-auto">
-                        {memory.people.map((person, index) =>
+                        {(memory.people || []).map((person, index) =>
                           person.social ? (
                             <a
                               key={index}
