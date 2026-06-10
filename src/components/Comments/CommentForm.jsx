@@ -37,7 +37,7 @@ export default function CommentForm({
     const body = comment.trim();
 
     if (!body) {
-      showToast("Please write a reflection before posting.", false);
+      showToast("Please write a comment before posting.", false);
       return;
     }
 
@@ -163,7 +163,7 @@ export default function CommentForm({
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Write your reflection here…"
+            placeholder="Write your comment here…"
             className="
               w-full
               px-4

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "../../lib/supabase";
 
 import CommentForm from "./CommentForm";
 import CommentCard from "./CommentCard";
@@ -8,6 +9,24 @@ export default function CommentSection(props) {
   const [comments, setComments] = useState(initialComments);
   const [showAllComments, setShowAllComments] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
+
+  // Fetch fresh comments from Supabase on mount so that
+  // production pages (static HTML) always show the latest data.
+  useEffect(() => {
+    async function fetchComments() {
+      const { data, error } = await supabase
+        .from("memory_comments")
+        .select("id, memory_id, username, comment, created_at, parent_id")
+        .eq("memory_id", memoryId)
+        .order("created_at", { ascending: false });
+
+      if (!error && data) {
+        setComments(data);
+      }
+    }
+
+    fetchComments();
+  }, [memoryId]);
 
   const parentComments = comments.filter(
     (comment) => comment.parent_id === null || comment.parent_id === undefined,

@@ -284,7 +284,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
     setAddingTag(true);
     const { data, error } = await supabase
       .from("tags")
-      .insert({ name, slug: slugify(name) })
+      .insert({ tag, slug: slugify(tag) })
       .select()
       .single();
 
@@ -295,7 +295,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
         [...p, data].sort((a, b) => a.name.localeCompare(b.name))
       );
       setSelectedTagIds((p) => [...p, data.id]);
-      showToast(`Tag "${name}" created`, "success");
+      showToast(`Tag "${tag}" created`, "success");
     }
     setNewTagInput("");
     setAddingTag(false);
@@ -907,7 +907,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
                     e.target.style.background = C.surfaceAlt;
                     e.target.style.boxShadow = `3px 3px 0px ${C.black}`;
                     e.target.style.transform = "none";
-                  }}
+                  }} disabled
                 />
               </div>
             </Field>
@@ -1062,11 +1062,8 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
                 gap: 12,
               }}
             >
-              <Field label="ID (readonly)">
-                <Input value={memory.id} disabled />
-              </Field>
-              <Field label="Cloudinary ID (readonly)">
-                <Input value={memory.cloudinary_public_id || "—"} disabled />
+              <Field label="Cloudinary ID">
+                <Input value={memory.cloudinary_public_id || "—"} />
               </Field>
             </div>
           </div>

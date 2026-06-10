@@ -363,6 +363,30 @@ export default function VideoModal({ memory, onClose }) {
                   </p>
 
                   <div className="flex flex-wrap gap-2">
+                    <a
+                      href="https://instagram.com/mdpashaaa"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="
+                            inline-flex
+                            items-center
+                            gap-1
+                            px-2
+                            py-1
+                            border-2
+                            border-black
+                            bg-[#FFFDF8]
+                            text-black
+                            text-[10px]
+                            font-bold
+                            shadow-[2px_2px_0_rgba(0,0,0,1)]
+                          "
+                    >
+                      <span className="material-symbols-outlined text-[12px]">
+                        person
+                      </span>
+                      Me
+                    </a>
                     {visiblePeople.map((person, index) =>
                       person.social_media ? (
                         <a
@@ -371,19 +395,19 @@ export default function VideoModal({ memory, onClose }) {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="
-        inline-flex
-        items-center
-        gap-1
-        px-2
-        py-1
-        border-2
-        border-black
-        bg-[#FFFDF8]
-        text-black
-        text-[10px]
-        font-bold
-        shadow-[2px_2px_0_rgba(0,0,0,1)]
-      "
+                            inline-flex
+                            items-center
+                            gap-1
+                            px-2
+                            py-1
+                            border-2
+                            border-black
+                            bg-[#FFFDF8]
+                            text-black
+                            text-[10px]
+                            font-bold
+                            shadow-[2px_2px_0_rgba(0,0,0,1)]
+                          "
                         >
                           <span className="material-symbols-outlined text-[12px]">
                             person
@@ -411,7 +435,7 @@ export default function VideoModal({ memory, onClose }) {
                           </span>
                           {person.name}
                         </span>
-                      )
+                      ),
                     )}
 
                     {hiddenCount > 0 && (
@@ -461,7 +485,7 @@ export default function VideoModal({ memory, onClose }) {
                     >
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="font-black">
-                          People in Frame ({(memory.people || []).length})
+                          People in Frame ({(memory.people || []).length + 1})
                         </h3>
 
                         <button
@@ -484,6 +508,32 @@ export default function VideoModal({ memory, onClose }) {
                       </div>
 
                       <div className="flex flex-col gap-2 max-h-[50vh] overflow-y-auto">
+                        <a
+                          href="https://instagram.com/mdpashaaa"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="
+                                flex
+                                items-center
+                                justify-between
+                                border-2
+                                border-black
+                                bg-white
+                                p-2
+                                shadow-[2px_2px_0_rgba(0,0,0,1)]
+                            "
+                        >
+                          <span className="flex items-center gap-2">
+                            <span className="material-symbols-outlined">
+                              person
+                            </span>
+                            Me
+                          </span>
+
+                          <span className="material-symbols-outlined">
+                            open_in_new
+                          </span>
+                        </a>
                         {(memory.people || []).map((person, index) =>
                           person.social_media ? (
                             <a
@@ -532,7 +582,7 @@ export default function VideoModal({ memory, onClose }) {
 
                               {person.name}
                             </div>
-                          )
+                          ),
                         )}
                       </div>
                     </div>

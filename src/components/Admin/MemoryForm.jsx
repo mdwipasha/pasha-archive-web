@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { uploadToCloudinary } from "../../lib/cloudinary";
 
-// ── Design tokens from DESIGN.md ──
+// ── Design tokens ──────────────────────────────────────────────────────────────
 const C = {
   bg: "#F3EFE6",
   surface: "#FFFDF8",
@@ -47,6 +47,517 @@ const labelStyle = {
   marginBottom: 6,
 };
 
+const focusIn = (e) => {
+  e.target.style.background = C.surface;
+  e.target.style.boxShadow = "none";
+  e.target.style.transform = "translate(2px,2px)";
+};
+const focusOut = (e) => {
+  e.target.style.background = C.surfaceAlt;
+  e.target.style.boxShadow = `3px 3px 0px ${C.black}`;
+  e.target.style.transform = "none";
+};
+
+// ── Manage Modal ───────────────────────────────────────────────────────────────
+
+function ManageModal({
+  open,
+  onClose,
+  tags,
+  people,
+  onTagsChange,
+  onPeopleChange,
+}) {
+  const [tab, setTab] = useState("people");
+  const [newPerson, setNewPerson] = useState("");
+  const [newPersonSocial, setNewPersonSocial] = useState("");
+  const [newTag, setNewTag] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const overlayRef = useRef(null);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open, onClose]);
+
+  // Lock body scroll while open
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  async function addPerson() {
+    const name = newPerson.trim();
+    if (!name) {
+      setError("Name cannot be empty");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    const { error: err } = await supabase.from("people").insert({
+      name,
+      social_media: newPersonSocial.trim() || null,
+    });
+    if (err) {
+      setError(err.message);
+      setBusy(false);
+      return;
+    }
+    setNewPerson("");
+    setNewPersonSocial("");
+    await onPeopleChange();
+    setBusy(false);
+  }
+
+  async function addTag() {
+    const tag = newTag.trim();
+    if (!tag) {
+      setError("Tag cannot be empty");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    const { error: err } = await supabase.from("tags").insert({ tag });
+    if (err) {
+      setError(err.message);
+      setBusy(false);
+      return;
+    }
+    setNewTag("");
+    await onTagsChange();
+    setBusy(false);
+  }
+
+  async function deletePerson(id, name) {
+    if (
+      !window.confirm(`Delete "${name}"? They'll be removed from all memories.`)
+    )
+      return;
+    await supabase.from("memory_people").delete().eq("person_id", id);
+    await supabase.from("people").delete().eq("id", id);
+    await onPeopleChange();
+  }
+
+  async function deleteTag(id, tag) {
+    if (
+      !window.confirm(`Delete "#${tag}"? It'll be removed from all memories.`)
+    )
+      return;
+    await supabase.from("memory_tags").delete().eq("tag_id", id);
+    await supabase.from("tags").delete().eq("id", id);
+    await onTagsChange();
+  }
+
+  const tabBtn = (key, label, accent) => ({
+    border: `2px solid ${C.black}`,
+    background: tab === key ? C.black : C.surface,
+    color: tab === key ? C.surface : C.black,
+    padding: "8px 20px",
+    fontFamily: "'Inter', sans-serif",
+    fontWeight: 700,
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    cursor: "pointer",
+    transition: "all 0.1s ease",
+  });
+
+  return (
+    <div
+      ref={overlayRef}
+      onClick={(e) => {
+        if (e.target === overlayRef.current) onClose();
+      }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(28,27,27,0.55)",
+        zIndex: 9000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 16,
+      }}
+    >
+      <div
+        style={{
+          background: C.surface,
+          border: `3px solid ${C.black}`,
+          boxShadow: `8px 8px 0px ${C.black}`,
+          width: "100%",
+          maxWidth: 560,
+          maxHeight: "85vh",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* Modal header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "14px 20px",
+            borderBottom: `2px solid ${C.black}`,
+            background: C.black,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontWeight: 700,
+              fontSize: 13,
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+              color: C.surface,
+            }}
+          >
+            Manage People &amp; Tags
+          </span>
+          <button
+            onClick={onClose}
+            style={{
+              background: "transparent",
+              border: `2px solid ${C.surface}`,
+              color: C.surface,
+              width: 28,
+              height: 28,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              fontWeight: 900,
+              fontSize: 16,
+              lineHeight: 1,
+              flexShrink: 0,
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: "flex", borderBottom: `2px solid ${C.black}` }}>
+          <button
+            style={tabBtn("people")}
+            onClick={() => {
+              setTab("people");
+              setError(null);
+            }}
+          >
+            👤 People {people.length > 0 && `(${people.length})`}
+          </button>
+          <button
+            style={tabBtn("tags")}
+            onClick={() => {
+              setTab("tags");
+              setError(null);
+            }}
+          >
+            # Tags {tags.length > 0 && `(${tags.length})`}
+          </button>
+        </div>
+
+        {/* Modal body */}
+        <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
+          {error && (
+            <div
+              style={{
+                border: `2px solid ${C.black}`,
+                background: C.error,
+                color: C.errorText,
+                padding: "8px 14px",
+                marginBottom: 16,
+                fontWeight: 700,
+                fontSize: 12,
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          {/* ── People tab ── */}
+          {tab === "people" && (
+            <div>
+              <p style={labelStyle}>Add new person</p>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 10,
+                  marginBottom: 10,
+                }}
+              >
+                <input
+                  type="text"
+                  value={newPerson}
+                  onChange={(e) => setNewPerson(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addPerson();
+                    }
+                  }}
+                  placeholder="Name"
+                  style={{ ...inputStyle, fontSize: 13 }}
+                  onFocus={focusIn}
+                  onBlur={focusOut}
+                />
+                <input
+                  type="text"
+                  value={newPersonSocial}
+                  onChange={(e) => setNewPersonSocial(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addPerson();
+                    }
+                  }}
+                  placeholder="Social link (optional)"
+                  style={{ ...inputStyle, fontSize: 13 }}
+                  onFocus={focusIn}
+                  onBlur={focusOut}
+                />
+              </div>
+              <button
+                onClick={addPerson}
+                disabled={busy}
+                style={{
+                  border: `2px solid ${C.black}`,
+                  background: C.blue,
+                  color: C.black,
+                  padding: "8px 18px",
+                  fontWeight: 700,
+                  fontSize: 12,
+                  cursor: busy ? "not-allowed" : "pointer",
+                  boxShadow: `3px 3px 0px ${C.black}`,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  marginBottom: 20,
+                  opacity: busy ? 0.6 : 1,
+                }}
+              >
+                + Add Person
+              </button>
+
+              {people.length === 0 ? (
+                <p
+                  style={{
+                    color: C.textSecondary,
+                    fontSize: 13,
+                    fontStyle: "italic",
+                  }}
+                >
+                  No people yet. Add someone above.
+                </p>
+              ) : (
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 6 }}
+                >
+                  {people.map((p) => (
+                    <div
+                      key={p.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        border: `2px solid ${C.black}`,
+                        background: C.surfaceAlt,
+                        padding: "8px 12px",
+                      }}
+                    >
+                      <div>
+                        <span style={{ fontWeight: 700, fontSize: 13 }}>
+                          {p.name}
+                        </span>
+                        {p.social_media && (
+                          <a
+                            href={p.social_media}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              marginLeft: 10,
+                              fontSize: 11,
+                              color: C.outline,
+                              textDecoration: "underline",
+                            }}
+                          >
+                            {p.social_media.replace(/https?:\/\/(www\.)?/, "")}
+                          </a>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => deletePerson(p.id, p.name)}
+                        style={{
+                          border: `2px solid ${C.black}`,
+                          background: C.error,
+                          color: C.errorText,
+                          padding: "3px 9px",
+                          fontWeight: 900,
+                          fontSize: 13,
+                          cursor: "pointer",
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Tags tab ── */}
+          {tab === "tags" && (
+            <div>
+              <p style={labelStyle}>Add new tag</p>
+              <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
+                <input
+                  type="text"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addTag();
+                    }
+                  }}
+                  placeholder="Tag name"
+                  style={{ ...inputStyle, fontSize: 13 }}
+                  onFocus={focusIn}
+                  onBlur={focusOut}
+                />
+                <button
+                  onClick={addTag}
+                  disabled={busy}
+                  style={{
+                    border: `2px solid ${C.black}`,
+                    background: C.yellow,
+                    color: C.black,
+                    padding: "8px 18px",
+                    fontWeight: 700,
+                    fontSize: 12,
+                    cursor: busy ? "not-allowed" : "pointer",
+                    boxShadow: `3px 3px 0px ${C.black}`,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                    opacity: busy ? 0.6 : 1,
+                  }}
+                >
+                  + Add Tag
+                </button>
+              </div>
+
+              {tags.length === 0 ? (
+                <p
+                  style={{
+                    color: C.textSecondary,
+                    fontSize: 13,
+                    fontStyle: "italic",
+                  }}
+                >
+                  No tags yet. Add one above.
+                </p>
+              ) : (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {tags.map((t) => (
+                    <div
+                      key={t.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        border: `2px solid ${C.black}`,
+                        background: C.yellow,
+                        padding: "6px 10px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontWeight: 700,
+                          fontSize: 12,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.04em",
+                        }}
+                      >
+                        #{t.tag}
+                      </span>
+                      <button
+                        onClick={() => deleteTag(t.id, t.tag)}
+                        style={{
+                          border: "none",
+                          background: "transparent",
+                          cursor: "pointer",
+                          fontWeight: 900,
+                          fontSize: 14,
+                          lineHeight: 1,
+                          color: C.black,
+                          padding: "0 2px",
+                          opacity: 0.5,
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.opacity = 1;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.opacity = 0.5;
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Modal footer */}
+        <div
+          style={{
+            padding: "12px 20px",
+            borderTop: `2px solid ${C.black}`,
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
+          <button
+            onClick={onClose}
+            style={{
+              border: `2px solid ${C.black}`,
+              background: C.black,
+              color: C.surface,
+              padding: "8px 20px",
+              fontWeight: 700,
+              fontSize: 12,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              cursor: "pointer",
+            }}
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Component ─────────────────────────────────────────────────────────────
+
 export default function MemoryForm({ onSaved }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -57,12 +568,11 @@ export default function MemoryForm({ onSaved }) {
 
   const [tags, setTags] = useState([]);
   const [people, setPeople] = useState([]);
-
-  const [newTag, setNewTag] = useState("");
-  const [newPerson, setNewPerson] = useState("");
-
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedPeople, setSelectedPeople] = useState([]);
+
+  const [manageOpen, setManageOpen] = useState(false);
+
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -76,14 +586,31 @@ export default function MemoryForm({ onSaved }) {
 
   async function loadTags() {
     const { data } = await supabase.from("tags").select("*").order("tag");
-
     setTags(data || []);
   }
 
   async function loadPeople() {
     const { data } = await supabase.from("people").select("*").order("name");
-
     setPeople(data || []);
+  }
+
+  // Remove deleted items from selections
+  async function reloadTags() {
+    const { data } = await supabase.from("tags").select("*").order("tag");
+    const fresh = data || [];
+    setTags(fresh);
+    setSelectedTags((prev) =>
+      prev.filter((id) => fresh.some((t) => t.id === id)),
+    );
+  }
+
+  async function reloadPeople() {
+    const { data } = await supabase.from("people").select("*").order("name");
+    const fresh = data || [];
+    setPeople(fresh);
+    setSelectedPeople((prev) =>
+      prev.filter((id) => fresh.some((p) => p.id === id)),
+    );
   }
 
   function generateSlug(text) {
@@ -103,11 +630,7 @@ export default function MemoryForm({ onSaved }) {
     if (!f) return;
     setFile(f);
     setPreview(URL.createObjectURL(f));
-    if (f.type.startsWith("video/")) {
-      setType("Video");
-    } else {
-      setType("Photo");
-    }
+    setType(f.type.startsWith("video/") ? "Video" : "Photo");
   }
 
   function handleDrop(e) {
@@ -119,76 +642,6 @@ export default function MemoryForm({ onSaved }) {
     }
   }
 
-  async function createTag() {
-    const tagValue = newTag.trim();
-    if (!tagValue) {
-      showToast("Tag cannot be empty", "error");
-      return;
-    }
-
-    const { error } = await supabase.from("tags").insert({ tag: tagValue });
-    if (error) {
-      showToast(error.message, "error");
-      return;
-    }
-
-    setNewTag("");
-    showToast(`Tag '${tagValue}' added`);
-    await loadTags();
-  }
-
-  async function createPerson() {
-    const personValue = newPerson.trim();
-    if (!personValue) {
-      showToast("Person name cannot be empty", "error");
-      return;
-    }
-
-    const { error } = await supabase.from("people").insert({ name: personValue });
-    if (error) {
-      showToast(error.message, "error");
-      return;
-    }
-
-    setNewPerson("");
-    showToast(`Person '${personValue}' added`);
-    await loadPeople();
-  }
-
-  async function deleteTag(tagId) {
-    if (!window.confirm("Delete this tag? This will remove it from the list.")) {
-      return;
-    }
-
-    await supabase.from("memory_tags").delete().eq("tag_id", tagId);
-    const { error } = await supabase.from("tags").delete().eq("id", tagId);
-    if (error) {
-      showToast(error.message, "error");
-      return;
-    }
-
-    setSelectedTags(selectedTags.filter((id) => id !== tagId));
-    showToast("Tag deleted");
-    await loadTags();
-  }
-
-  async function deletePerson(personId) {
-    if (!window.confirm("Delete this person? This will remove them from the list.")) {
-      return;
-    }
-
-    await supabase.from("memory_people").delete().eq("person_id", personId);
-    const { error } = await supabase.from("people").delete().eq("id", personId);
-    if (error) {
-      showToast(error.message, "error");
-      return;
-    }
-
-    setSelectedPeople(selectedPeople.filter((id) => id !== personId));
-    showToast("Person deleted");
-    await loadPeople();
-  }
-
   async function handleSubmit(e) {
     e.preventDefault();
     if (!file) {
@@ -198,9 +651,7 @@ export default function MemoryForm({ onSaved }) {
     setLoading(true);
 
     const yearFolder = date ? new Date(date).getFullYear() : "unknown";
-
     let cloudinary;
-
     try {
       cloudinary = await uploadToCloudinary(
         file,
@@ -213,11 +664,8 @@ export default function MemoryForm({ onSaved }) {
     }
 
     let thumbnail = null;
-
     if (cloudinary.resource_type === "video") {
-      thumbnail = `https://res.cloudinary.com/${
-        import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME
-      }/video/upload/so_1/${cloudinary.public_id}.jpg`;
+      thumbnail = `https://res.cloudinary.com/${import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME}/video/upload/so_1/${cloudinary.public_id}.jpg`;
     }
 
     const { data: memory, error } = await supabase
@@ -238,23 +686,18 @@ export default function MemoryForm({ onSaved }) {
       .select()
       .single();
 
-    // ── Link Tags ──
     if (selectedTags.length > 0 && memory) {
-      const { error: tagError } = await supabase.from("memory_tags").insert(
-        selectedTags.map((tagId) => ({
-          memory_id: memory.id,
-          tag_id: tagId,
-        })),
-      );
-
-      if (tagError) {
-        console.error("Error linking tags:", tagError);
-      }
+      await supabase
+        .from("memory_tags")
+        .insert(
+          selectedTags.map((tagId) => ({
+            memory_id: memory.id,
+            tag_id: tagId,
+          })),
+        );
     }
-
-    // ── Link People ──
     if (selectedPeople.length > 0 && memory) {
-      const { error: peopleError } = await supabase
+      await supabase
         .from("memory_people")
         .insert(
           selectedPeople.map((personId) => ({
@@ -262,10 +705,6 @@ export default function MemoryForm({ onSaved }) {
             person_id: personId,
           })),
         );
-
-      if (peopleError) {
-        console.error("Error linking people:", peopleError);
-      }
     }
 
     setLoading(false);
@@ -282,8 +721,24 @@ export default function MemoryForm({ onSaved }) {
     setFeatured(false);
     setFile(null);
     setPreview(null);
+    setSelectedTags([]);
+    setSelectedPeople([]);
     if (onSaved) onSaved();
   }
+
+  const chipStyle = (active, accent) => ({
+    border: `2px solid ${C.black}`,
+    background: active ? accent : C.surface,
+    color: C.black,
+    padding: "8px 14px",
+    cursor: "pointer",
+    fontWeight: 700,
+    fontSize: 13,
+    fontFamily: "'Inter', sans-serif",
+    boxShadow: active ? `2px 2px 0px ${C.black}` : `4px 4px 0px ${C.black}`,
+    transform: active ? "translate(2px,2px)" : "none",
+    transition: "all .12s ease",
+  });
 
   return (
     <div style={{ position: "relative" }}>
@@ -314,6 +769,16 @@ export default function MemoryForm({ onSaved }) {
         </div>
       )}
 
+      {/* Manage Modal */}
+      <ManageModal
+        open={manageOpen}
+        onClose={() => setManageOpen(false)}
+        tags={tags}
+        people={people}
+        onTagsChange={reloadTags}
+        onPeopleChange={reloadPeople}
+      />
+
       <form onSubmit={handleSubmit}>
         {/* Row 1: Title + Date */}
         <div
@@ -333,16 +798,8 @@ export default function MemoryForm({ onSaved }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              onFocus={(e) => {
-                e.target.style.background = C.surface;
-                e.target.style.boxShadow = "none";
-                e.target.style.transform = "translate(2px,2px)";
-              }}
-              onBlur={(e) => {
-                e.target.style.background = C.surfaceAlt;
-                e.target.style.boxShadow = `3px 3px 0px ${C.black}`;
-                e.target.style.transform = "none";
-              }}
+              onFocus={focusIn}
+              onBlur={focusOut}
             />
           </div>
           <div>
@@ -352,16 +809,8 @@ export default function MemoryForm({ onSaved }) {
               style={inputStyle}
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              onFocus={(e) => {
-                e.target.style.background = C.surface;
-                e.target.style.boxShadow = "none";
-                e.target.style.transform = "translate(2px,2px)";
-              }}
-              onBlur={(e) => {
-                e.target.style.background = C.surfaceAlt;
-                e.target.style.boxShadow = `3px 3px 0px ${C.black}`;
-                e.target.style.transform = "none";
-              }}
+              onFocus={focusIn}
+              onBlur={focusOut}
             />
           </div>
         </div>
@@ -383,16 +832,8 @@ export default function MemoryForm({ onSaved }) {
               placeholder="e.g. Bromo, East Java"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              onFocus={(e) => {
-                e.target.style.background = C.surface;
-                e.target.style.boxShadow = "none";
-                e.target.style.transform = "translate(2px,2px)";
-              }}
-              onBlur={(e) => {
-                e.target.style.background = C.surfaceAlt;
-                e.target.style.boxShadow = `3px 3px 0px ${C.black}`;
-                e.target.style.transform = "none";
-              }}
+              onFocus={focusIn}
+              onBlur={focusOut}
             />
           </div>
           <div
@@ -471,271 +912,181 @@ export default function MemoryForm({ onSaved }) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            onFocus={(e) => {
-              e.target.style.background = C.surface;
-              e.target.style.boxShadow = "none";
-              e.target.style.transform = "translate(2px,2px)";
-            }}
-            onBlur={(e) => {
-              e.target.style.background = C.surfaceAlt;
-              e.target.style.boxShadow = `3px 3px 0px ${C.black}`;
-              e.target.style.transform = "none";
-            }}
+            onFocus={focusIn}
+            onBlur={focusOut}
           />
         </div>
 
-        <div
-          style={{
-            border: `2px dashed ${C.black}`,
-            padding: 16,
-            background: C.surfaceAlt,
-            marginBottom: 16,
-          }}
-        >
+        {/* ── People selector ── */}
+        <div style={{ marginBottom: 16 }}>
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 16,
-              marginBottom: 18,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 8,
             }}
           >
-            <div>
-              <label style={labelStyle}>Add Person</label>
-              <div style={{ display: "flex", gap: 10 }}>
-                <input
-                  type="text"
-                  value={newPerson}
-                  onChange={(e) => setNewPerson(e.target.value)}
-                  placeholder="Person name"
-                  style={{ ...inputStyle, flex: 1 }}
-                />
-                <button
-                  type="button"
-                  onClick={createPerson}
-                  style={{
-                    border: `2px solid ${C.black}`,
-                    background: C.blue,
-                    color: C.black,
-                    padding: "10px 14px",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    boxShadow: "3px 3px 0px #000",
-                  }}
-                >
-                  ＋
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label style={labelStyle}>Add Tag</label>
-              <div style={{ display: "flex", gap: 10 }}>
-                <input
-                  type="text"
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  placeholder="Tag name"
-                  style={{ ...inputStyle, flex: 1 }}
-                />
-                <button
-                  type="button"
-                  onClick={createTag}
-                  style={{
-                    border: `2px solid ${C.black}`,
-                    background: C.yellow,
-                    color: C.black,
-                    padding: "10px 14px",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    boxShadow: "3px 3px 0px #000",
-                  }}
-                >
-                  ＋
-                </button>
-              </div>
-            </div>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>People</label>
+            <button
+              type="button"
+              onClick={() => setManageOpen(true)}
+              style={{
+                border: `2px solid ${C.black}`,
+                background: C.surface,
+                color: C.black,
+                padding: "4px 10px",
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 700,
+                fontSize: 10,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                cursor: "pointer",
+                boxShadow: `2px 2px 0px ${C.black}`,
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              ⚙ Manage
+            </button>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 16,
-            }}
-          >
-            <div>
-              <div style={{ marginBottom: 10, fontWeight: 700, color: C.onSurfaceVariant }}>
-                People list
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-                {people.map((person) => (
-                  <div
+          {people.length === 0 ? (
+            <p
+              style={{
+                fontSize: 12,
+                color: C.textSecondary,
+                fontStyle: "italic",
+              }}
+            >
+              No people yet —{" "}
+              <button
+                type="button"
+                onClick={() => setManageOpen(true)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                  fontStyle: "italic",
+                  fontSize: 12,
+                  color: C.textSecondary,
+                }}
+              >
+                add someone
+              </button>
+            </p>
+          ) : (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+              {people.map((person) => {
+                const active = selectedPeople.includes(person.id);
+                return (
+                  <button
                     key={person.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      border: `2px solid ${C.black}`,
-                      padding: "8px 12px",
-                      background: C.surface,
-                    }}
+                    type="button"
+                    onClick={() =>
+                      setSelectedPeople((prev) =>
+                        active
+                          ? prev.filter((id) => id !== person.id)
+                          : [...prev, person.id],
+                      )
+                    }
+                    style={chipStyle(active, C.blue)}
                   >
-                    <span>{person.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => deletePerson(person.id)}
-                      style={{
-                        border: "none",
-                        background: "transparent",
-                        cursor: "pointer",
-                        fontWeight: 700,
-                        color: C.black,
-                      }}
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
+                    {active ? "✓ " : ""}
+                    {person.name}
+                  </button>
+                );
+              })}
             </div>
+          )}
+        </div>
 
-            <div>
-              <div style={{ marginBottom: 10, fontWeight: 700, color: C.onSurfaceVariant }}>
-                Tag list
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-                {tags.map((tag) => (
-                  <div
+        {/* ── Tags selector ── */}
+        <div style={{ marginBottom: 24 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 8,
+            }}
+          >
+            <label style={{ ...labelStyle, marginBottom: 0 }}>Tags</label>
+            <button
+              type="button"
+              onClick={() => setManageOpen(true)}
+              style={{
+                border: `2px solid ${C.black}`,
+                background: C.surface,
+                color: C.black,
+                padding: "4px 10px",
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 700,
+                fontSize: 10,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                cursor: "pointer",
+                boxShadow: `2px 2px 0px ${C.black}`,
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              ⚙ Manage
+            </button>
+          </div>
+
+          {tags.length === 0 ? (
+            <p
+              style={{
+                fontSize: 12,
+                color: C.textSecondary,
+                fontStyle: "italic",
+              }}
+            >
+              No tags yet —{" "}
+              <button
+                type="button"
+                onClick={() => setManageOpen(true)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                  fontStyle: "italic",
+                  fontSize: 12,
+                  color: C.textSecondary,
+                }}
+              >
+                create one
+              </button>
+            </p>
+          ) : (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+              {tags.map((tag) => {
+                const active = selectedTags.includes(tag.id);
+                return (
+                  <button
                     key={tag.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      border: `2px solid ${C.black}`,
-                      padding: "8px 12px",
-                      background: C.surface,
-                    }}
+                    type="button"
+                    onClick={() =>
+                      setSelectedTags((prev) =>
+                        active
+                          ? prev.filter((id) => id !== tag.id)
+                          : [...prev, tag.id],
+                      )
+                    }
+                    style={chipStyle(active, C.yellow)}
                   >
-                    <span>{tag.tag}</span>
-                    <button
-                      type="button"
-                      onClick={() => deleteTag(tag.id)}
-                      style={{
-                        border: "none",
-                        background: "transparent",
-                        cursor: "pointer",
-                        fontWeight: 700,
-                        color: C.black,
-                      }}
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
+                    {active ? "✓ " : ""}
+                    {tag.tag}
+                  </button>
+                );
+              })}
             </div>
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 16 }}>
-          <label style={labelStyle}>People</label>
-
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 10,
-            }}
-          >
-            {people.map((person) => {
-              const active = selectedPeople.includes(person.id);
-
-              return (
-                <button
-                  key={person.id}
-                  type="button"
-                  onClick={() => {
-                    if (active) {
-                      setSelectedPeople(
-                        selectedPeople.filter((id) => id !== person.id),
-                      );
-                    } else {
-                      setSelectedPeople([...selectedPeople, person.id]);
-                    }
-                  }}
-                  style={{
-                    border: `2px solid ${C.black}`,
-                    background: active ? C.blue : C.surface,
-                    color: C.black,
-                    padding: "8px 14px",
-                    cursor: "pointer",
-                    fontWeight: 700,
-                    fontSize: 13,
-                    fontFamily: "'Inter', sans-serif",
-                    boxShadow: active
-                      ? `2px 2px 0px ${C.black}`
-                      : `4px 4px 0px ${C.black}`,
-                    transform: active ? "translate(2px,2px)" : "none",
-                    transition: "all .12s ease",
-                  }}
-                >
-                  {active ? "✓ " : ""}
-                  {person.name}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 16 }}>
-          <label style={labelStyle}>Tags</label>
-
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 10,
-            }}
-          >
-            {tags.map((tag) => {
-              const active = selectedTags.includes(tag.id);
-
-              return (
-                <button
-                  key={tag.id}
-                  type="button"
-                  onClick={() => {
-                    if (active) {
-                      setSelectedTags(
-                        selectedTags.filter((id) => id !== tag.id),
-                      );
-                    } else {
-                      setSelectedTags([...selectedTags, tag.id]);
-                    }
-                  }}
-                  style={{
-                    border: `2px solid ${C.black}`,
-                    background: active ? C.yellow : C.surface,
-                    color: C.black,
-                    padding: "8px 14px",
-                    cursor: "pointer",
-                    fontWeight: 700,
-                    fontSize: 13,
-                    fontFamily: "'Inter', sans-serif",
-                    boxShadow: active
-                      ? `2px 2px 0px ${C.black}`
-                      : `4px 4px 0px ${C.black}`,
-                    transform: active ? "translate(2px,2px)" : "none",
-                    transition: "all .12s ease",
-                  }}
-                >
-                  {active ? "✓ " : ""}
-                  {tag.tag}
-                </button>
-              );
-            })}
-          </div>
+          )}
         </div>
 
         {/* Image Drop Zone */}
@@ -790,6 +1141,7 @@ export default function MemoryForm({ onSaved }) {
                   />
                 )}
                 <div
+                  className="img-overlay"
                   style={{
                     position: "absolute",
                     inset: 0,
@@ -800,7 +1152,6 @@ export default function MemoryForm({ onSaved }) {
                     justifyContent: "center",
                     transition: "opacity 0.15s",
                   }}
-                  className="img-overlay"
                 >
                   <span
                     style={{
@@ -830,7 +1181,6 @@ export default function MemoryForm({ onSaved }) {
                   pointerEvents: "none",
                 }}
               >
-                <span style={{ fontSize: 36 }}>📷</span>
                 <p
                   style={{
                     fontFamily: "'Space Grotesk', sans-serif",
@@ -842,7 +1192,7 @@ export default function MemoryForm({ onSaved }) {
                     margin: 0,
                   }}
                 >
-                  Drop image here or click to browse
+                  Drop image/video here or click to browse
                 </p>
                 <p
                   style={{
@@ -852,7 +1202,7 @@ export default function MemoryForm({ onSaved }) {
                     margin: 0,
                   }}
                 >
-                  PNG · JPG · WEBP
+                  PNG · JPG · WEBP · MP4 · MOV
                 </p>
               </div>
             )}
@@ -924,9 +1274,7 @@ export default function MemoryForm({ onSaved }) {
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        @media (max-width: 600px) {
-          .form-grid-2 { grid-template-columns: 1fr !important; }
-        }
+        @media (max-width: 600px) { .form-grid-2 { grid-template-columns: 1fr !important; } }
         .img-overlay:hover { opacity: 1 !important; }
         div:hover > .img-overlay { opacity: 1 !important; }
       `}</style>

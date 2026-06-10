@@ -208,42 +208,51 @@ export default function ImageModal({ memory, onClose }) {
               </div>
             </div>
 
-            {memory.people?.length > 0 && (
-              <div className="mt-6 pt-3 border-t-2 border-black border-dashed">
-                <p className="text-[10px] uppercase tracking-[0.05em] font-semibold text-[#6B7280] mb-2">
-                  People in Frame
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {(memory.people || []).map((people, index) =>
-                    people.social_media ? (
-                      <a
-                        key={index}
-                        href={people.social_media}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-2 py-1 border-2 border-black bg-[#FFFDF8] text-xs font-bold text-black shadow-[2px_2px_0_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
-                      >
-                        <span className="material-symbols-outlined text-[12px]">
-                          person
-                        </span>
-                        <p className="underline">{people.name}</p>
-                      </a>
-                    ) : (
-                      // no social link → plain black badge
-                      <span
-                        key={index}
-                        className="inline-flex items-center gap-1 px-2 py-1 border-2 border-black bg-black text-xs font-bold text-[#FFFDF8]"
-                      >
-                        <span className="material-symbols-outlined text-[12px]">
-                          person
-                        </span>
-                        {people.name}
+            <div className="mt-6 pt-3 border-t-2 border-black border-dashed">
+              <p className="text-[10px] uppercase tracking-[0.05em] font-semibold text-[#6B7280] mb-2">
+                People in Frame
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                <a
+                      href="https://www.instagram.com/mdpashaaa"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2 py-1 border-2 border-black bg-[#FFFDF8] text-xs font-bold text-black shadow-[2px_2px_0_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+                    >
+                      <span className="material-symbols-outlined text-[12px]">
+                        person
                       </span>
-                    )
-                  )}
-                </div>
+                      <p className="underline">Me</p>
+                    </a>
+                {(memory.people || []).map((people, index) =>
+                  people.social_media ? (
+                    <a
+                      key={index}
+                      href={people.social_media}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2 py-1 border-2 border-black bg-[#FFFDF8] text-xs font-bold text-black shadow-[2px_2px_0_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+                    >
+                      <span className="material-symbols-outlined text-[12px]">
+                        person
+                      </span>
+                      <p className="underline">{people.name}</p>
+                    </a>
+                  ) : (
+                    // no social link → plain black badge
+                    <span
+                      key={index}
+                      className="inline-flex items-center gap-1 px-2 py-1 border-2 border-black bg-black text-xs font-bold text-[#FFFDF8]"
+                    >
+                      <span className="material-symbols-outlined text-[12px]">
+                        person
+                      </span>
+                      {people.name}
+                    </span>
+                  ),
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
