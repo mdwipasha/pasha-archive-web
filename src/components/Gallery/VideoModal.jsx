@@ -241,8 +241,6 @@ export default function VideoModal({ memory, onClose }) {
               h-72
               bg-gradient-to-t
               from-black
-              via-black/75
-              sm:via-black/90
               to-transparent
             "
           />
