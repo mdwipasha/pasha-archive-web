@@ -691,9 +691,6 @@ export default function MemoriesMap() {
         date
       `);
 
-    console.log("ERROR:", error);
-    console.log("DATA:", data);
-
     if (error) {
       console.error(error);
       return;

@@ -57,11 +57,10 @@ function FilterGroup({ label, options, selected, onToggle, accent }) {
             <button
               key={opt}
               onClick={() => onToggle(opt)}
-              className={`border-2 border-black px-3 py-1.5 text-xs uppercase tracking-[0.12em] font-bold transition-all duration-150 ${
-                active
-                  ? `${accent} shadow-none translate-x-[2px] translate-y-[2px]`
-                  : "bg-white text-black shadow-[2px_2px_0_rgb(0,0,0)] hover:bg-[#f3efe6]"
-              }`}
+              className={`border-2 border-black px-3 py-1.5 text-xs uppercase tracking-[0.12em] font-bold transition-all duration-150 ${active
+                ? `${accent} shadow-none translate-x-[2px] translate-y-[2px]`
+                : "bg-white text-black shadow-[2px_2px_0_rgb(0,0,0)] hover:bg-[#f3efe6]"
+                }`}
             >
               {opt}
             </button>
@@ -92,6 +91,7 @@ function ActiveChip({ label, onRemove }) {
 export default function GallerySection({ memories }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedTypes, setSelectedTypes] = useState([]);
   const [selectedYears, setSelectedYears] = useState([]);
   const [selectedLocations, setSelectedLocations] = useState([]);
   const [selectedPeople, setSelectedPeople] = useState([]);
@@ -105,11 +105,14 @@ export default function GallerySection({ memories }) {
     const years = [
       ...new Set(memories.map(getMemoryYear).filter(Boolean)),
     ].sort((a, b) => Number(b) - Number(a));
+    const type = [
+      ...new Set(memories.map((m) => m.type).filter(Boolean)),
+    ].sort((a, b) => Number(b) - Number(a));
     const locations = [
       ...new Set(memories.map((m) => m.location).filter(Boolean)),
     ].sort();
     const people = [...new Set(memories.flatMap(getMemoryPersonNames))].sort();
-    return { tags, years, locations, people };
+    return { tags, type, years, locations, people };
   }, [memories]);
 
   // ── Sorted + filtered memories ─────────────────────────────────────────────
@@ -139,6 +142,12 @@ export default function GallerySection({ memories }) {
           return false;
       }
 
+      // Types — OR within group
+      if (selectedTypes.length > 0) {
+        if (!selectedTypes.some((t) => (memory.type || []).includes(t)))
+          return false;
+      }
+
       // Year — OR within group
       if (selectedYears.length > 0) {
         if (!selectedYears.includes(getMemoryYear(memory))) return false;
@@ -161,6 +170,7 @@ export default function GallerySection({ memories }) {
     sortedMemories,
     searchQuery,
     selectedTags,
+    selectedTypes,
     selectedYears,
     selectedLocations,
     selectedPeople,
@@ -178,6 +188,7 @@ export default function GallerySection({ memories }) {
   };
 
   const toggleTag = makeToggler(setSelectedTags);
+  const toggleType = makeToggler(setSelectedTypes);
   const toggleYear = makeToggler(setSelectedYears);
   const toggleLocation = makeToggler(setSelectedLocations);
   const togglePerson = makeToggler(setSelectedPeople);
@@ -185,6 +196,7 @@ export default function GallerySection({ memories }) {
   const clearAll = () => {
     setSearchQuery("");
     setSelectedTags([]);
+    setSelectedTypes([]);
     setSelectedYears([]);
     setSelectedLocations([]);
     setSelectedPeople([]);
@@ -195,6 +207,7 @@ export default function GallerySection({ memories }) {
 
   const totalActiveFilters =
     selectedTags.length +
+    selectedTypes.length +
     selectedYears.length +
     selectedLocations.length +
     selectedPeople.length;
@@ -205,6 +218,10 @@ export default function GallerySection({ memories }) {
     ...selectedTags.map((v) => ({
       label: `# ${v}`,
       onRemove: () => toggleTag(v),
+    })),
+    ...selectedTypes.map((v) => ({
+      label: `# ${v}`,
+      onRemove: () => toggleType(v),
     })),
     ...selectedYears.map((v) => ({
       label: `📅 ${v}`,
@@ -253,11 +270,10 @@ export default function GallerySection({ memories }) {
 
         <button
           onClick={() => setShowFilters((v) => !v)}
-          className={`flex items-center gap-2 border-2 border-black px-5 py-3 uppercase tracking-[0.15em] text-sm font-black transition-all duration-150 whitespace-nowrap ${
-            showFilters || totalActiveFilters > 0
-              ? "bg-black text-white shadow-none translate-x-[2px] translate-y-[2px]"
-              : "bg-[#FFFDF8] text-black shadow-[3px_3px_0_rgb(0,0,0)] hover:bg-[#f3efe6]"
-          }`}
+          className={`flex items-center gap-2 border-2 border-black px-5 py-3 uppercase tracking-[0.15em] text-sm font-black transition-all duration-150 whitespace-nowrap ${showFilters || totalActiveFilters > 0
+            ? "bg-black text-white shadow-none translate-x-[2px] translate-y-[2px]"
+            : "bg-[#FFFDF8] text-black shadow-[3px_3px_0_rgb(0,0,0)] hover:bg-[#f3efe6]"
+            }`}
         >
           <span>Filters</span>
           {totalActiveFilters > 0 && (
@@ -276,6 +292,13 @@ export default function GallerySection({ memories }) {
             options={filterOptions.tags}
             selected={selectedTags}
             onToggle={toggleTag}
+            accent="bg-[#FFD700]"
+          />
+          <FilterGroup
+            label="Types"
+            options={filterOptions.type}
+            selected={selectedTypes}
+            onToggle={toggleType}
             accent="bg-[#FFD700]"
           />
           <FilterGroup
