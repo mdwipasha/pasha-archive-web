@@ -1,8 +1,8 @@
-import { c as createComponent } from './astro-component_Cm1CKSpY.mjs';
+import { c as createComponent } from './astro-component_DqjkGFZ6.mjs';
 import 'piccolore';
-import { o as renderComponent, k as renderTemplate, m as maybeRenderHead, h as addAttribute } from './entrypoint_BLBYqHYh.mjs';
-import { $ as $$Layout, a as $$Footer } from './Footer_BQTO-CiJ.mjs';
-import { $ as $$Navbar } from './Navbar_LdvXXN32.mjs';
+import { o as renderComponent, k as renderTemplate, m as maybeRenderHead, h as addAttribute } from './entrypoint_CaXNZmEO.mjs';
+import { $ as $$Layout, a as $$Footer } from './Footer_k0mJAHN5.mjs';
+import { $ as $$Navbar } from './Navbar_FlYiRqL1.mjs';
 import { useState, useEffect } from 'react';
 import { s as supabase } from './supabase_DGD5oBn6.mjs';
 
@@ -379,13 +379,14 @@ const $$item = createComponent(async ($$result, $$props, $$slots) => {
   const { data: tagsData } = tagIds.length ? await supabase.from("tags").select("id, tag").in("id", tagIds) : { data: [] };
   const { data: memoryPeopleData } = await supabase.from("memory_people").select("person_id").eq("memory_id", data.id);
   const personIds = (memoryPeopleData || []).map((row) => row.person_id);
-  const { data: peopleData } = personIds.length ? await supabase.from("people").select("id, name, social").in("id", personIds) : { data: [] };
+  const { data: peopleData } = personIds.length ? await supabase.from("people").select("id, name, social_media").in("id", personIds) : { data: [] };
   const memory = {
     ...data,
     tags: (tagsData || []).map((tag) => tag.tag),
     people: (peopleData || []).map((person) => ({
       name: person.name,
-      social: person.social
+      social: person.social_media,
+      social_media: person.social_media
     }))
   };
   const { data: commentsRes } = await supabase.from("memory_comments").select("id, memory_id, username, comment, created_at, parent_id").eq("memory_id", data.id).order("created_at", {

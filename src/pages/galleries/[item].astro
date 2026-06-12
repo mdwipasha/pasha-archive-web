@@ -33,7 +33,7 @@ const { data: memoryPeopleData } = await supabase
   .eq("memory_id", data.id);
 const personIds = (memoryPeopleData || []).map((row) => row.person_id);
 const { data: peopleData } = personIds.length
-  ? await supabase.from("people").select("id, name, social").in("id", personIds)
+  ? await supabase.from("people").select("id, name, social_media").in("id", personIds)
   : { data: [] };
 
 const memory = {
@@ -41,7 +41,8 @@ const memory = {
   tags: (tagsData || []).map((tag) => tag.tag),
   people: (peopleData || []).map((person) => ({
     name: person.name,
-    social: person.social,
+    social: person.social_media,
+    social_media: person.social_media,
   })),
 };
 

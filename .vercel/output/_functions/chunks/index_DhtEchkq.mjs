@@ -1,7 +1,7 @@
-import { c as createComponent } from './astro-component_Cm1CKSpY.mjs';
+import { c as createComponent } from './astro-component_DqjkGFZ6.mjs';
 import 'piccolore';
-import { o as renderComponent, k as renderTemplate } from './entrypoint_BLBYqHYh.mjs';
-import { $ as $$Layout, a as $$Footer } from './Footer_BQTO-CiJ.mjs';
+import { o as renderComponent, k as renderTemplate } from './entrypoint_CaXNZmEO.mjs';
+import { $ as $$Layout, a as $$Footer } from './Footer_k0mJAHN5.mjs';
 import { useRef, useState, useEffect } from 'react';
 import { s as supabase } from './supabase_DGD5oBn6.mjs';
 

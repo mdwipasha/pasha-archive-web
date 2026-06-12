@@ -1,8 +1,8 @@
-import { c as createComponent } from './astro-component_Cm1CKSpY.mjs';
+import { c as createComponent } from './astro-component_DqjkGFZ6.mjs';
 import 'piccolore';
-import { m as maybeRenderHead, k as renderTemplate, h as addAttribute, o as renderComponent } from './entrypoint_BLBYqHYh.mjs';
-import { $ as $$Layout, a as $$Footer } from './Footer_BQTO-CiJ.mjs';
-import { $ as $$Navbar } from './Navbar_LdvXXN32.mjs';
+import { m as maybeRenderHead, k as renderTemplate, h as addAttribute, o as renderComponent } from './entrypoint_CaXNZmEO.mjs';
+import { $ as $$Layout, a as $$Footer } from './Footer_k0mJAHN5.mjs';
+import { $ as $$Navbar } from './Navbar_FlYiRqL1.mjs';
 import 'clsx';
 import { s as supabase } from './supabase_DGD5oBn6.mjs';
 
@@ -56,7 +56,7 @@ See all
 }, "C:/laragon/www/mdpashaaa-archive-web/src/components/RecentArchive.astro", void 0);
 
 const $$Index = createComponent(($$result, $$props, $$slots) => {
-  return renderTemplate`${renderComponent($$result, "Layout", $$Layout, { "title": "Home" }, { "default": ($$result2) => renderTemplate` ${renderComponent($$result2, "Navbar", $$Navbar, {})} ${renderComponent($$result2, "Hero", $$Hero, {})} ${renderComponent($$result2, "RecentArchive", $$RecentArchive, {})} ${renderComponent($$result2, "MemoriesMap", null, { "client:only": true, "client:component-hydration": "only", "client:component-path": "C:/laragon/www/mdpashaaa-archive-web/src/components/MemoriesMap", "client:component-export": "default" })} ${renderComponent($$result2, "Footer", $$Footer, {})} ` })} `;
+  return renderTemplate`${renderComponent($$result, "Layout", $$Layout, { "title": "Home" }, { "default": ($$result2) => renderTemplate` ${renderComponent($$result2, "Navbar", $$Navbar, {})} ${renderComponent($$result2, "Hero", $$Hero, {})} ${renderComponent($$result2, "RecentArchive", $$RecentArchive, {})} ${renderComponent($$result2, "MemoriesMap", null, { "client:only": true, "client:component-hydration": "only", "client:component-path": "C:/laragon/www/mdpashaaa-archive-web/src/components/MemoriesMap", "client:component-export": "default" })} ${renderComponent($$result2, "Footer", $$Footer, {})} ` })}`;
 }, "C:/laragon/www/mdpashaaa-archive-web/src/pages/index.astro", void 0);
 
 const $$file = "C:/laragon/www/mdpashaaa-archive-web/src/pages/index.astro";
