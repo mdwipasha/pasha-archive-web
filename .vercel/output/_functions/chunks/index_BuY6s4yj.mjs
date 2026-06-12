@@ -1,7 +1,7 @@
-import { c as createComponent } from './astro-component_BRqMzFq8.mjs';
+import { c as createComponent } from './astro-component_BJwlJK9M.mjs';
 import 'piccolore';
-import { o as renderComponent, k as renderTemplate } from './entrypoint_C29uGayX.mjs';
-import { $ as $$Layout, a as $$Footer } from './Footer_CA2chA3Q.mjs';
+import { o as renderComponent, k as renderTemplate } from './entrypoint_COeJS7jA.mjs';
+import { $ as $$Layout, a as $$Footer } from './Footer_B8Fw-5ay.mjs';
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import { useRef, useState, useEffect } from 'react';
 import { s as supabase } from './supabase_DGD5oBn6.mjs';
