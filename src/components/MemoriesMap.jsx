@@ -89,9 +89,8 @@ function makeMemoryIcon(memory, color, count = 1) {
           border:1.5px solid rgba(0,0,0,.2);
           z-index:2;
         "></div>
-        ${
-          count > 1
-            ? `
+        ${count > 1
+        ? `
           <div style="
             position:absolute;top:-10px;right:-10px;
             background:#000;color:${color};
@@ -101,8 +100,8 @@ function makeMemoryIcon(memory, color, count = 1) {
             border:2px solid #000;z-index:10;
           ">${count}</div>
         `
-            : ""
-        }
+        : ""
+      }
         <img
           src="${memory.type === "Video" ? memory.thumbnail_url : memory.image}"
           style="width:100%;height:52px;object-fit:cover;display:block;border-bottom:2px solid #000;"

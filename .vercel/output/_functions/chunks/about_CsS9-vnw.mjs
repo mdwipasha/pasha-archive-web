@@ -1,8 +1,8 @@
-import { c as createComponent } from './astro-component_DqjkGFZ6.mjs';
+import { c as createComponent } from './astro-component_BRqMzFq8.mjs';
 import 'piccolore';
-import { m as maybeRenderHead, k as renderTemplate, o as renderComponent } from './entrypoint_CaXNZmEO.mjs';
-import { $ as $$Layout, a as $$Footer } from './Footer_k0mJAHN5.mjs';
-import { $ as $$Navbar } from './Navbar_FlYiRqL1.mjs';
+import { m as maybeRenderHead, k as renderTemplate, o as renderComponent } from './entrypoint_C29uGayX.mjs';
+import { $ as $$Layout, a as $$Footer } from './Footer_CA2chA3Q.mjs';
+import { $ as $$Navbar } from './Navbar_CrbcDzle.mjs';
 import 'clsx';
 
 const $$About$1 = createComponent(($$result, $$props, $$slots) => {

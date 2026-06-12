@@ -8,43 +8,59 @@ import GallerySection from "../../components/Gallery/GallerySection.jsx";
 import { supabase } from "../../lib/supabase";
 
 const { data: memoriesData } = await supabase.from("memories").select("*");
-const { data: memoryTagsData } = await supabase.from("memory_tags").select("memory_id, tag_id");
+const { data: memoryTagsData } = await supabase
+    .from("memory_tags")
+    .select("memory_id, tag_id");
 const { data: tagsData } = await supabase.from("tags").select("id, tag");
-const { data: memoryPeopleData } = await supabase.from("memory_people").select("memory_id, person_id");
-const { data: peopleData } = await supabase.from("people").select("id, name, social_media");
+const { data: memoryPeopleData } = await supabase
+    .from("memory_people")
+    .select("memory_id, person_id");
+const { data: peopleData } = await supabase
+    .from("people")
+    .select("id, name, social_media");
 
-const memoryTags = /** @type {{memory_id:number, tag_id:number}[]} */ (memoryTagsData || []);
+const memoryTags = /** @type {{memory_id:number, tag_id:number}[]} */ (
+    memoryTagsData || []
+);
 const tagsList = /** @type {{id:number, tag:string}[]} */ (tagsData || []);
-const memoryPeople = /** @type {{memory_id:number, person_id:number}[]} */ (memoryPeopleData || []);
-const peopleList = /** @type {{id:number, name:string, social_media:string | null}[]} */ (peopleData || []);
+const memoryPeople = /** @type {{memory_id:number, person_id:number}[]} */ (
+    memoryPeopleData || []
+);
+const peopleList =
+    /** @type {{id:number, name:string, social_media:string | null}[]} */ (
+        peopleData || []
+    );
 
 const tagsById = new Map(tagsList.map((tag) => [tag.id, tag.tag]));
 const peopleById = new Map(
-  peopleList.map((person) => [person.id, { name: person.name, social_media: person.social_media }]),
+    peopleList.map((person) => [
+        person.id,
+        { name: person.name, social_media: person.social_media },
+    ]),
 );
 
 const tagsByMemoryId = new Map();
 for (const row of memoryTags) {
-  const tagName = tagsById.get(row.tag_id);
-  if (!tagName) continue;
-  const current = tagsByMemoryId.get(row.memory_id) || [];
-  current.push(tagName);
-  tagsByMemoryId.set(row.memory_id, current);
+    const tagName = tagsById.get(row.tag_id);
+    if (!tagName) continue;
+    const current = tagsByMemoryId.get(row.memory_id) || [];
+    current.push(tagName);
+    tagsByMemoryId.set(row.memory_id, current);
 }
 
 const peopleByMemoryId = new Map();
 for (const row of memoryPeople) {
-  const person = peopleById.get(row.person_id);
-  if (!person) continue;
-  const current = peopleByMemoryId.get(row.memory_id) || [];
-  current.push(person);
-  peopleByMemoryId.set(row.memory_id, current);
+    const person = peopleById.get(row.person_id);
+    if (!person) continue;
+    const current = peopleByMemoryId.get(row.memory_id) || [];
+    current.push(person);
+    peopleByMemoryId.set(row.memory_id, current);
 }
 
 const memories = (memoriesData || []).map((memory) => ({
-  ...memory,
-  tags: tagsByMemoryId.get(memory.id) || [],
-  people: peopleByMemoryId.get(memory.id) || [],
+    ...memory,
+    tags: tagsByMemoryId.get(memory.id) || [],
+    people: peopleByMemoryId.get(memory.id) || [],
 }));
 ---
 
@@ -67,7 +83,8 @@ const memories = (memoriesData || []).map((memory) => ({
                     <p
                         class="text-lg md:text-xl leading-relaxed text-[#444748] max-w-3xl"
                     >
-                        A collection of moments captured across time — and  memories worth keeping.
+                        A collection of moments captured across time — and
+                        memories worth keeping.
                     </p>
                 </div>
             </div>

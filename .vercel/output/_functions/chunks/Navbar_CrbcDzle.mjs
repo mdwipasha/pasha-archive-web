@@ -1,6 +1,6 @@
-import { c as createComponent } from './astro-component_DqjkGFZ6.mjs';
+import { c as createComponent } from './astro-component_BRqMzFq8.mjs';
 import 'piccolore';
-import { p as createRenderInstruction, m as maybeRenderHead, h as addAttribute, k as renderTemplate } from './entrypoint_CaXNZmEO.mjs';
+import { p as createRenderInstruction, m as maybeRenderHead, h as addAttribute, k as renderTemplate } from './entrypoint_C29uGayX.mjs';
 import 'clsx';
 
 async function renderScript(result, id) {
@@ -21,7 +21,7 @@ const $$Navbar = createComponent(($$result, $$props, $$slots) => {
   const navItems = [
     { name: "Home", href: "/#home" },
     { name: "Gallery", href: "/galleries" },
-    { name: "About", href: "/" }
+    { name: "Form Submission", href: "/form-submission" }
   ];
   return renderTemplate`${maybeRenderHead()}<header class="sticky top-0 w-full border-b-2 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] bg-[#F3EFE6] z-100"> <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4"> <a href="/" class="text-2xl font-black uppercase tracking-tighter">
 Pasha Archive
