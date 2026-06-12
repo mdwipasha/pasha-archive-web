@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { uploadToCloudinary } from "../../lib/cloudinary";
+import LocationPicker from "./LocationPicker";
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
 const C = {
@@ -76,43 +77,30 @@ function ManageModal({
   const [error, setError] = useState(null);
   const overlayRef = useRef(null);
 
-  // Close on Escape
   useEffect(() => {
     if (!open) return;
-    const handler = (e) => {
-      if (e.key === "Escape") onClose();
-    };
+    const handler = (e) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [open, onClose]);
 
-  // Lock body scroll while open
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, [open]);
 
   if (!open) return null;
 
   async function addPerson() {
     const name = newPerson.trim();
-    if (!name) {
-      setError("Name cannot be empty");
-      return;
-    }
+    if (!name) { setError("Name cannot be empty"); return; }
     setBusy(true);
     setError(null);
     const { error: err } = await supabase.from("people").insert({
       name,
       social_media: newPersonSocial.trim() || null,
     });
-    if (err) {
-      setError(err.message);
-      setBusy(false);
-      return;
-    }
+    if (err) { setError(err.message); setBusy(false); return; }
     setNewPerson("");
     setNewPersonSocial("");
     await onPeopleChange();
@@ -121,44 +109,31 @@ function ManageModal({
 
   async function addTag() {
     const tag = newTag.trim();
-    if (!tag) {
-      setError("Tag cannot be empty");
-      return;
-    }
+    if (!tag) { setError("Tag cannot be empty"); return; }
     setBusy(true);
     setError(null);
     const { error: err } = await supabase.from("tags").insert({ tag });
-    if (err) {
-      setError(err.message);
-      setBusy(false);
-      return;
-    }
+    if (err) { setError(err.message); setBusy(false); return; }
     setNewTag("");
     await onTagsChange();
     setBusy(false);
   }
 
   async function deletePerson(id, name) {
-    if (
-      !window.confirm(`Delete "${name}"? They'll be removed from all memories.`)
-    )
-      return;
+    if (!window.confirm(`Delete "${name}"? They'll be removed from all memories.`)) return;
     await supabase.from("memory_people").delete().eq("person_id", id);
     await supabase.from("people").delete().eq("id", id);
     await onPeopleChange();
   }
 
   async function deleteTag(id, tag) {
-    if (
-      !window.confirm(`Delete "#${tag}"? It'll be removed from all memories.`)
-    )
-      return;
+    if (!window.confirm(`Delete "#${tag}"? It'll be removed from all memories.`)) return;
     await supabase.from("memory_tags").delete().eq("tag_id", id);
     await supabase.from("tags").delete().eq("id", id);
     await onTagsChange();
   }
 
-  const tabBtn = (key, label, accent) => ({
+  const tabBtn = (key) => ({
     border: `2px solid ${C.black}`,
     background: tab === key ? C.black : C.surface,
     color: tab === key ? C.surface : C.black,
@@ -175,9 +150,7 @@ function ManageModal({
   return (
     <div
       ref={overlayRef}
-      onClick={(e) => {
-        if (e.target === overlayRef.current) onClose();
-      }}
+      onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
       style={{
         position: "fixed",
         inset: 0,
@@ -201,7 +174,6 @@ function ManageModal({
           flexDirection: "column",
         }}
       >
-        {/* Modal header */}
         <div
           style={{
             display: "flex",
@@ -246,29 +218,15 @@ function ManageModal({
           </button>
         </div>
 
-        {/* Tabs */}
         <div style={{ display: "flex", borderBottom: `2px solid ${C.black}` }}>
-          <button
-            style={tabBtn("people")}
-            onClick={() => {
-              setTab("people");
-              setError(null);
-            }}
-          >
+          <button style={tabBtn("people")} onClick={() => { setTab("people"); setError(null); }}>
             👤 People {people.length > 0 && `(${people.length})`}
           </button>
-          <button
-            style={tabBtn("tags")}
-            onClick={() => {
-              setTab("tags");
-              setError(null);
-            }}
-          >
+          <button style={tabBtn("tags")} onClick={() => { setTab("tags"); setError(null); }}>
             # Tags {tags.length > 0 && `(${tags.length})`}
           </button>
         </div>
 
-        {/* Modal body */}
         <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
           {error && (
             <div
@@ -286,28 +244,15 @@ function ManageModal({
             </div>
           )}
 
-          {/* ── People tab ── */}
           {tab === "people" && (
             <div>
               <p style={labelStyle}>Add new person</p>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 10,
-                  marginBottom: 10,
-                }}
-              >
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
                 <input
                   type="text"
                   value={newPerson}
                   onChange={(e) => setNewPerson(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addPerson();
-                    }
-                  }}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addPerson(); } }}
                   placeholder="Name"
                   style={{ ...inputStyle, fontSize: 13 }}
                   onFocus={focusIn}
@@ -317,12 +262,7 @@ function ManageModal({
                   type="text"
                   value={newPersonSocial}
                   onChange={(e) => setNewPersonSocial(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addPerson();
-                    }
-                  }}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addPerson(); } }}
                   placeholder="Social link (optional)"
                   style={{ ...inputStyle, fontSize: 13 }}
                   onFocus={focusIn}
@@ -351,19 +291,11 @@ function ManageModal({
               </button>
 
               {people.length === 0 ? (
-                <p
-                  style={{
-                    color: C.textSecondary,
-                    fontSize: 13,
-                    fontStyle: "italic",
-                  }}
-                >
+                <p style={{ color: C.textSecondary, fontSize: 13, fontStyle: "italic" }}>
                   No people yet. Add someone above.
                 </p>
               ) : (
-                <div
-                  style={{ display: "flex", flexDirection: "column", gap: 6 }}
-                >
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {people.map((p) => (
                     <div
                       key={p.id}
@@ -377,20 +309,13 @@ function ManageModal({
                       }}
                     >
                       <div>
-                        <span style={{ fontWeight: 700, fontSize: 13 }}>
-                          {p.name}
-                        </span>
+                        <span style={{ fontWeight: 700, fontSize: 13 }}>{p.name}</span>
                         {p.social_media && (
                           <a
                             href={p.social_media}
                             target="_blank"
                             rel="noopener noreferrer"
-                            style={{
-                              marginLeft: 10,
-                              fontSize: 11,
-                              color: C.outline,
-                              textDecoration: "underline",
-                            }}
+                            style={{ marginLeft: 10, fontSize: 11, color: C.outline, textDecoration: "underline" }}
                           >
                             {p.social_media.replace(/https?:\/\/(www\.)?/, "")}
                           </a>
@@ -418,7 +343,6 @@ function ManageModal({
             </div>
           )}
 
-          {/* ── Tags tab ── */}
           {tab === "tags" && (
             <div>
               <p style={labelStyle}>Add new tag</p>
@@ -427,12 +351,7 @@ function ManageModal({
                   type="text"
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addTag();
-                    }
-                  }}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
                   placeholder="Tag name"
                   style={{ ...inputStyle, fontSize: 13 }}
                   onFocus={focusIn}
@@ -462,13 +381,7 @@ function ManageModal({
               </div>
 
               {tags.length === 0 ? (
-                <p
-                  style={{
-                    color: C.textSecondary,
-                    fontSize: 13,
-                    fontStyle: "italic",
-                  }}
-                >
+                <p style={{ color: C.textSecondary, fontSize: 13, fontStyle: "italic" }}>
                   No tags yet. Add one above.
                 </p>
               ) : (
@@ -485,14 +398,7 @@ function ManageModal({
                         padding: "6px 10px",
                       }}
                     >
-                      <span
-                        style={{
-                          fontWeight: 700,
-                          fontSize: 12,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.04em",
-                        }}
-                      >
+                      <span style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.04em" }}>
                         #{t.tag}
                       </span>
                       <button
@@ -508,12 +414,8 @@ function ManageModal({
                           padding: "0 2px",
                           opacity: 0.5,
                         }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.opacity = 1;
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.opacity = 0.5;
-                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.opacity = 1; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.opacity = 0.5; }}
                       >
                         ×
                       </button>
@@ -525,15 +427,7 @@ function ManageModal({
           )}
         </div>
 
-        {/* Modal footer */}
-        <div
-          style={{
-            padding: "12px 20px",
-            borderTop: `2px solid ${C.black}`,
-            display: "flex",
-            justifyContent: "flex-end",
-          }}
-        >
+        <div style={{ padding: "12px 20px", borderTop: `2px solid ${C.black}`, display: "flex", justifyContent: "flex-end" }}>
           <button
             onClick={onClose}
             style={{
@@ -562,6 +456,8 @@ export default function MemoryForm({ onSaved }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
   const [date, setDate] = useState("");
   const [featured, setFeatured] = useState(false);
   const [type, setType] = useState("Photo");
@@ -572,6 +468,7 @@ export default function MemoryForm({ onSaved }) {
   const [selectedPeople, setSelectedPeople] = useState([]);
 
   const [manageOpen, setManageOpen] = useState(false);
+  const [locationPickerOpen, setLocationPickerOpen] = useState(false);
 
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -594,31 +491,22 @@ export default function MemoryForm({ onSaved }) {
     setPeople(data || []);
   }
 
-  // Remove deleted items from selections
   async function reloadTags() {
     const { data } = await supabase.from("tags").select("*").order("tag");
     const fresh = data || [];
     setTags(fresh);
-    setSelectedTags((prev) =>
-      prev.filter((id) => fresh.some((t) => t.id === id)),
-    );
+    setSelectedTags((prev) => prev.filter((id) => fresh.some((t) => t.id === id)));
   }
 
   async function reloadPeople() {
     const { data } = await supabase.from("people").select("*").order("name");
     const fresh = data || [];
     setPeople(fresh);
-    setSelectedPeople((prev) =>
-      prev.filter((id) => fresh.some((p) => p.id === id)),
-    );
+    setSelectedPeople((prev) => prev.filter((id) => fresh.some((p) => p.id === id)));
   }
 
   function generateSlug(text) {
-    return text
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w-]/g, "");
+    return text.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^\w-]/g, "");
   }
 
   function showToast(msg, type = "success") {
@@ -644,19 +532,13 @@ export default function MemoryForm({ onSaved }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!file) {
-      showToast("Please select an image first.", "error");
-      return;
-    }
+    if (!file) { showToast("Please select an image first.", "error"); return; }
     setLoading(true);
 
     const yearFolder = date ? new Date(date).getFullYear() : "unknown";
     let cloudinary;
     try {
-      cloudinary = await uploadToCloudinary(
-        file,
-        `pasha-archive/${yearFolder}`,
-      );
+      cloudinary = await uploadToCloudinary(file, `pasha-archive/${yearFolder}`);
     } catch (err) {
       showToast(err.message, "error");
       setLoading(false);
@@ -678,6 +560,8 @@ export default function MemoryForm({ onSaved }) {
         date: date || null,
         year: date ? new Date(date).getFullYear() : null,
         location,
+        latitude: latitude !== "" ? Number(latitude) : null,
+        longitude: longitude !== "" ? Number(longitude) : null,
         src: cloudinary.secure_url,
         cloudinary_public_id: cloudinary.public_id,
         thumbnail_url: thumbnail,
@@ -687,36 +571,25 @@ export default function MemoryForm({ onSaved }) {
       .single();
 
     if (selectedTags.length > 0 && memory) {
-      await supabase
-        .from("memory_tags")
-        .insert(
-          selectedTags.map((tagId) => ({
-            memory_id: memory.id,
-            tag_id: tagId,
-          })),
-        );
+      await supabase.from("memory_tags").insert(
+        selectedTags.map((tagId) => ({ memory_id: memory.id, tag_id: tagId }))
+      );
     }
     if (selectedPeople.length > 0 && memory) {
-      await supabase
-        .from("memory_people")
-        .insert(
-          selectedPeople.map((personId) => ({
-            memory_id: memory.id,
-            person_id: personId,
-          })),
-        );
+      await supabase.from("memory_people").insert(
+        selectedPeople.map((personId) => ({ memory_id: memory.id, person_id: personId }))
+      );
     }
 
     setLoading(false);
-    if (error) {
-      showToast(error.message, "error");
-      return;
-    }
+    if (error) { showToast(error.message, "error"); return; }
 
     showToast("Memory uploaded successfully!");
     setTitle("");
     setDescription("");
     setLocation("");
+    setLatitude("");
+    setLongitude("");
     setDate("");
     setFeatured(false);
     setFile(null);
@@ -739,6 +612,8 @@ export default function MemoryForm({ onSaved }) {
     transform: active ? "translate(2px,2px)" : "none",
     transition: "all .12s ease",
   });
+
+  const hasCoords = latitude !== "" && longitude !== "";
 
   return (
     <div style={{ position: "relative" }}>
@@ -779,15 +654,23 @@ export default function MemoryForm({ onSaved }) {
         onPeopleChange={reloadPeople}
       />
 
+      {/* Location Picker Modal */}
+      {locationPickerOpen && (
+        <LocationPicker
+          lat={latitude}
+          lng={longitude}
+          onConfirm={(lat, lng) => {
+            setLatitude(lat);
+            setLongitude(lng);
+          }}
+          onClose={() => setLocationPickerOpen(false)}
+        />
+      )}
+
       <form onSubmit={handleSubmit}>
         {/* Row 1: Title + Date */}
         <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 16,
-            marginBottom: 16,
-          }}
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}
           className="form-grid-2"
         >
           <div>
@@ -817,12 +700,7 @@ export default function MemoryForm({ onSaved }) {
 
         {/* Row 2: Location + Featured */}
         <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 16,
-            marginBottom: 16,
-          }}
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}
           className="form-grid-2"
         >
           <div>
@@ -836,13 +714,7 @@ export default function MemoryForm({ onSaved }) {
               onBlur={focusOut}
             />
           </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-end",
-            }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
             <label style={labelStyle}>Featured</label>
             <button
               type="button"
@@ -864,14 +736,8 @@ export default function MemoryForm({ onSaved }) {
                 width: "100%",
                 textAlign: "left",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translate(2px,2px)";
-                e.currentTarget.style.boxShadow = "none";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "none";
-                e.currentTarget.style.boxShadow = `3px 3px 0px ${C.black}`;
-              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = "translate(2px,2px)"; e.currentTarget.style.boxShadow = "none"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = `3px 3px 0px ${C.black}`; }}
             >
               <span
                 style={{
@@ -886,20 +752,106 @@ export default function MemoryForm({ onSaved }) {
                 }}
               >
                 {featured && (
-                  <span
-                    style={{
-                      color: C.yellow,
-                      fontSize: 10,
-                      fontWeight: 900,
-                      lineHeight: 1,
-                    }}
-                  >
-                    ✓
-                  </span>
+                  <span style={{ color: C.yellow, fontSize: 10, fontWeight: 900, lineHeight: 1 }}>✓</span>
                 )}
               </span>
               {featured ? "⭐ Featured" : "Mark as Featured"}
             </button>
+          </div>
+        </div>
+
+        {/* Row 3: Latitude + Longitude + Map Picker */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 8 }} className="form-grid-2">
+            <div>
+              <label style={labelStyle}>Latitude</label>
+              <input
+                type="number"
+                step="any"
+                style={inputStyle}
+                placeholder="e.g. -7.9424"
+                value={latitude}
+                onChange={(e) => setLatitude(e.target.value)}
+                onFocus={focusIn}
+                onBlur={focusOut}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Longitude</label>
+              <input
+                type="number"
+                step="any"
+                style={inputStyle}
+                placeholder="e.g. 112.9530"
+                value={longitude}
+                onChange={(e) => setLongitude(e.target.value)}
+                onFocus={focusIn}
+                onBlur={focusOut}
+              />
+            </div>
+          </div>
+
+          {/* Map picker row */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <button
+              type="button"
+              onClick={() => setLocationPickerOpen(true)}
+              style={{
+                border: `2px solid ${C.black}`,
+                background: hasCoords ? C.yellow : C.blue,
+                color: C.black,
+                padding: "8px 18px",
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 700,
+                fontSize: 12,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                cursor: "pointer",
+                boxShadow: `3px 3px 0px ${C.black}`,
+                display: "flex",
+                alignItems: "center",
+                gap: 7,
+                transition: "all 0.12s ease",
+                flexShrink: 0,
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = "translate(2px,2px)"; e.currentTarget.style.boxShadow = "none"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = `3px 3px 0px ${C.black}`; }}
+            >
+               {hasCoords ? "Edit on Map" : "Pick on Map"}
+            </button>
+
+            {hasCoords && (
+              <>
+                <span
+                  style={{
+                    fontFamily: "monospace",
+                    fontSize: 12,
+                    color: C.onSurfaceVariant,
+                    background: C.surfaceAlt,
+                    border: `1px solid ${C.outlineVariant}`,
+                    padding: "4px 10px",
+                  }}
+                >
+                  {Number(latitude).toFixed(4)}, {Number(longitude).toFixed(4)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { setLatitude(""); setLongitude(""); }}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    fontSize: 14,
+                    color: C.outline,
+                    padding: "4px 6px",
+                    fontWeight: 900,
+                  }}
+                  title="Clear coordinates"
+                >
+                  ✕
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -917,16 +869,9 @@ export default function MemoryForm({ onSaved }) {
           />
         </div>
 
-        {/* ── People selector ── */}
+        {/* People selector */}
         <div style={{ marginBottom: 16 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 8,
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
             <label style={{ ...labelStyle, marginBottom: 0 }}>People</label>
             <button
               type="button"
@@ -953,26 +898,12 @@ export default function MemoryForm({ onSaved }) {
           </div>
 
           {people.length === 0 ? (
-            <p
-              style={{
-                fontSize: 12,
-                color: C.textSecondary,
-                fontStyle: "italic",
-              }}
-            >
+            <p style={{ fontSize: 12, color: C.textSecondary, fontStyle: "italic" }}>
               No people yet —{" "}
               <button
                 type="button"
                 onClick={() => setManageOpen(true)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                  fontStyle: "italic",
-                  fontSize: 12,
-                  color: C.textSecondary,
-                }}
+                style={{ background: "none", border: "none", cursor: "pointer", textDecoration: "underline", fontStyle: "italic", fontSize: 12, color: C.textSecondary }}
               >
                 add someone
               </button>
@@ -987,9 +918,7 @@ export default function MemoryForm({ onSaved }) {
                     type="button"
                     onClick={() =>
                       setSelectedPeople((prev) =>
-                        active
-                          ? prev.filter((id) => id !== person.id)
-                          : [...prev, person.id],
+                        active ? prev.filter((id) => id !== person.id) : [...prev, person.id]
                       )
                     }
                     style={chipStyle(active, C.blue)}
@@ -1003,16 +932,9 @@ export default function MemoryForm({ onSaved }) {
           )}
         </div>
 
-        {/* ── Tags selector ── */}
+        {/* Tags selector */}
         <div style={{ marginBottom: 24 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 8,
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
             <label style={{ ...labelStyle, marginBottom: 0 }}>Tags</label>
             <button
               type="button"
@@ -1039,26 +961,12 @@ export default function MemoryForm({ onSaved }) {
           </div>
 
           {tags.length === 0 ? (
-            <p
-              style={{
-                fontSize: 12,
-                color: C.textSecondary,
-                fontStyle: "italic",
-              }}
-            >
+            <p style={{ fontSize: 12, color: C.textSecondary, fontStyle: "italic" }}>
               No tags yet —{" "}
               <button
                 type="button"
                 onClick={() => setManageOpen(true)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                  fontStyle: "italic",
-                  fontSize: 12,
-                  color: C.textSecondary,
-                }}
+                style={{ background: "none", border: "none", cursor: "pointer", textDecoration: "underline", fontStyle: "italic", fontSize: 12, color: C.textSecondary }}
               >
                 create one
               </button>
@@ -1073,9 +981,7 @@ export default function MemoryForm({ onSaved }) {
                     type="button"
                     onClick={() =>
                       setSelectedTags((prev) =>
-                        active
-                          ? prev.filter((id) => id !== tag.id)
-                          : [...prev, tag.id],
+                        active ? prev.filter((id) => id !== tag.id) : [...prev, tag.id]
                       )
                     }
                     style={chipStyle(active, C.yellow)}
@@ -1093,10 +999,7 @@ export default function MemoryForm({ onSaved }) {
         <div style={{ marginBottom: 24 }}>
           <label style={labelStyle}>Image *</label>
           <div
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragOver(true);
-            }}
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={handleDrop}
             onClick={() => document.getElementById("mem-file-input").click()}
@@ -1120,25 +1023,9 @@ export default function MemoryForm({ onSaved }) {
             {preview ? (
               <div style={{ position: "relative" }}>
                 {file?.type.startsWith("video/") ? (
-                  <video
-                    src={preview}
-                    controls
-                    style={{
-                      width: "100%",
-                      maxHeight: 220,
-                      objectFit: "cover",
-                    }}
-                  />
+                  <video src={preview} controls style={{ width: "100%", maxHeight: 220, objectFit: "cover" }} />
                 ) : (
-                  <img
-                    src={preview}
-                    alt="Preview"
-                    style={{
-                      width: "100%",
-                      maxHeight: 220,
-                      objectFit: "cover",
-                    }}
-                  />
+                  <img src={preview} alt="Preview" style={{ width: "100%", maxHeight: 220, objectFit: "cover" }} />
                 )}
                 <div
                   className="img-overlay"
@@ -1153,55 +1040,17 @@ export default function MemoryForm({ onSaved }) {
                     transition: "opacity 0.15s",
                   }}
                 >
-                  <span
-                    style={{
-                      color: "#fff",
-                      fontFamily: "'Inter', sans-serif",
-                      fontWeight: 700,
-                      fontSize: 12,
-                      border: "2px solid #fff",
-                      padding: "6px 14px",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.06em",
-                    }}
-                  >
+                  <span style={{ color: "#fff", fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 12, border: "2px solid #fff", padding: "6px 14px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                     Change Image
                   </span>
                 </div>
               </div>
             ) : (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: 32,
-                  gap: 8,
-                  pointerEvents: "none",
-                }}
-              >
-                <p
-                  style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    fontWeight: 700,
-                    fontSize: 13,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.04em",
-                    color: C.onSurface,
-                    margin: 0,
-                  }}
-                >
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 32, gap: 8, pointerEvents: "none" }}>
+                <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 13, textTransform: "uppercase", letterSpacing: "0.04em", color: C.onSurface, margin: 0 }}>
                   Drop image/video here or click to browse
                 </p>
-                <p
-                  style={{
-                    fontFamily: "'Inter', sans-serif",
-                    fontSize: 11,
-                    color: C.textSecondary,
-                    margin: 0,
-                  }}
-                >
+                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: C.textSecondary, margin: 0 }}>
                   PNG · JPG · WEBP · MP4 · MOV
                 </p>
               </div>
@@ -1232,36 +1081,13 @@ export default function MemoryForm({ onSaved }) {
             justifyContent: "center",
             gap: 10,
           }}
-          onMouseEnter={(e) => {
-            if (!loading) {
-              e.currentTarget.style.transform = "translate(3px,3px)";
-              e.currentTarget.style.boxShadow = "none";
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!loading) {
-              e.currentTarget.style.transform = "none";
-              e.currentTarget.style.boxShadow = `5px 5px 0px ${C.yellow}`;
-            }
-          }}
+          onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.transform = "translate(3px,3px)"; e.currentTarget.style.boxShadow = "none"; } }}
+          onMouseLeave={(e) => { if (!loading) { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = `5px 5px 0px ${C.yellow}`; } }}
         >
           {loading ? (
             <>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                style={{ animation: "spin 0.8s linear infinite" }}
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  opacity="0.3"
-                />
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ animation: "spin 0.8s linear infinite" }}>
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.3" />
                 <path fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
               Uploading...

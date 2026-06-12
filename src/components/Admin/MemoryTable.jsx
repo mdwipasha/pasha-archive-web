@@ -473,7 +473,7 @@ function MemoryCard({ memory, deletingId, onEdit, onDelete }) {
               gap: 4,
             }}
           >
-            <span>📍</span> {memory.location}
+            <span>📍</span>{memory.location}
           </p>
         )}
       </div>

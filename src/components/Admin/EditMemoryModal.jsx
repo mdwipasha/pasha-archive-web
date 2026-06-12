@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { uploadToCloudinary } from "../../lib/cloudinary";
+import LocationPicker from "./LocationPicker";
 
 // ── Colour tokens ──────────────────────────────────────────────────────────────
 const C = {
@@ -99,10 +100,6 @@ function Textarea({ value, onChange, placeholder, rows = 3 }) {
   );
 }
 
-/**
- * Chip — used for both tags (yellow) and people (pink).
- * Keyboard-friendly: Space/Enter toggles.
- */
 function Chip({ label, selected, accent = C.yellow, onClick }) {
   return (
     <button
@@ -174,6 +171,12 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
   const [date, setDate] = useState(memory.date || "");
   const [year, setYear] = useState(memory.year ?? "");
   const [location, setLocation] = useState(memory.location || "");
+  const [latitude, setLatitude] = useState(
+    memory.latitude != null ? String(memory.latitude) : "",
+  );
+  const [longitude, setLongitude] = useState(
+    memory.longitude != null ? String(memory.longitude) : "",
+  );
   const [src, setSrc] = useState(memory.src || "");
   const [thumbnailUrl, setThumbnailUrl] = useState(memory.thumbnail_url || "");
   const [featured, setFeatured] = useState(memory.featured || false);
@@ -185,6 +188,9 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+
+  // ── Location picker ───────────────────────────────────────────────────────
+  const [locationPickerOpen, setLocationPickerOpen] = useState(false);
 
   // ── Tags state ────────────────────────────────────────────────────────────
   const [allTags, setAllTags] = useState([]);
@@ -256,9 +262,8 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
           .eq("memory_id", memory.id),
       ]);
 
-      if (e1 || e2 || e3 || e4) {
+      if (e1 || e2 || e3 || e4)
         showToast("Could not load tags or people.", "error");
-      }
 
       setAllTags(tags ?? []);
       setAllPeople(people ?? []);
@@ -271,20 +276,21 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
   // ── Toggle helpers ────────────────────────────────────────────────────────
   const toggleTag = (id) =>
     setSelectedTagIds((p) =>
-      p.includes(id) ? p.filter((x) => x !== id) : [...p, id]
+      p.includes(id) ? p.filter((x) => x !== id) : [...p, id],
     );
   const togglePerson = (id) =>
     setSelectedPersonIds((p) =>
-      p.includes(id) ? p.filter((x) => x !== id) : [...p, id]
+      p.includes(id) ? p.filter((x) => x !== id) : [...p, id],
     );
 
   // ── Create new tag inline ─────────────────────────────────────────────────
   async function handleCreateTag() {
-
+    const tag = newTagInput.trim();
+    if (!tag) return;
     setAddingTag(true);
     const { data, error } = await supabase
       .from("tags")
-      .insert({ tag, slug: slugify(tag) })
+      .insert({ tag })
       .select()
       .single();
 
@@ -292,7 +298,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
       showToast(error.message, "error");
     } else {
       setAllTags((p) =>
-        [...p, data].sort((a, b) => a.name.localeCompare(b.name))
+        [...p, data].sort((a, b) => a.tag.localeCompare(b.tag)),
       );
       setSelectedTagIds((p) => [...p, data.id]);
       showToast(`Tag "${tag}" created`, "success");
@@ -343,6 +349,8 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
       location,
       featured,
       thumbnail_url: thumbnailUrl || null,
+      latitude: latitude !== "" ? Number(latitude) : null,
+      longitude: longitude !== "" ? Number(longitude) : null,
     };
 
     if (file) {
@@ -351,7 +359,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
         const folder = memory.year ? memory.year : new Date().getFullYear();
         const result = await uploadToCloudinary(
           file,
-          `pasha-archive/${folder}`
+          `pasha-archive/${folder}`,
         );
 
         updateData.src = result.secure_url;
@@ -375,7 +383,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
       updateData.src = src || null;
     }
 
-    // ── 1. Update core memory row ─────────────────────────────────────────
+    // 1. Update core memory row
     const { error: memErr } = await supabase
       .from("memories")
       .update(updateData)
@@ -387,13 +395,13 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
       return;
     }
 
-    // ── 2. Sync tags (delete-then-insert) ─────────────────────────────────
+    // 2. Sync tags (delete-then-insert)
     await supabase.from("memory_tags").delete().eq("memory_id", memory.id);
     if (selectedTagIds.length > 0) {
       const { error: tagErr } = await supabase
         .from("memory_tags")
         .insert(
-          selectedTagIds.map((tag_id) => ({ memory_id: memory.id, tag_id }))
+          selectedTagIds.map((tag_id) => ({ memory_id: memory.id, tag_id })),
         );
       if (tagErr) {
         showToast(`Tags: ${tagErr.message}`, "error");
@@ -402,7 +410,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
       }
     }
 
-    // ── 3. Sync people (delete-then-insert) ───────────────────────────────
+    // 3. Sync people (delete-then-insert)
     await supabase.from("memory_people").delete().eq("memory_id", memory.id);
     if (selectedPersonIds.length > 0) {
       const { error: personErr } = await supabase
@@ -411,7 +419,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
           selectedPersonIds.map((person_id) => ({
             memory_id: memory.id,
             person_id,
-          }))
+          })),
         );
       if (personErr) {
         showToast(`People: ${personErr.message}`, "error");
@@ -426,6 +434,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
   }
 
   const busy = saving || uploading;
+  const hasCoords = latitude !== "" && longitude !== "";
 
   // ─────────────────────────────────────────────────────────────────────────
   return (
@@ -443,7 +452,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
         padding: 16,
       }}
     >
-      {/* ── Toast ─────────────────────────────────────────────────────────── */}
+      {/* Toast */}
       {toast && (
         <div
           style={{
@@ -471,7 +480,20 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
         </div>
       )}
 
-      {/* ── Modal shell ───────────────────────────────────────────────────── */}
+      {/* Location Picker — rendered above the modal */}
+      {locationPickerOpen && (
+        <LocationPicker
+          lat={latitude}
+          lng={longitude}
+          onConfirm={(lat, lng) => {
+            setLatitude(lat);
+            setLongitude(lng);
+          }}
+          onClose={() => setLocationPickerOpen(false)}
+        />
+      )}
+
+      {/* Modal shell */}
       <div
         className="animate-in"
         style={{
@@ -486,7 +508,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
           overflow: "hidden",
         }}
       >
-        {/* ── Header ───────────────────────────────────────────────────────── */}
+        {/* Header */}
         <div
           style={{
             background: C.black,
@@ -570,11 +592,11 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
           </button>
         </div>
 
-        {/* ── Body: two-panel ──────────────────────────────────────────────── */}
+        {/* Body: two-panel */}
         <div
           style={{ display: "flex", flex: 1, overflow: "hidden", minHeight: 0 }}
         >
-          {/* ── LEFT: media panel ─────────────────────────────────────────── */}
+          {/* LEFT: media panel */}
           <div
             style={{
               width: 240,
@@ -726,7 +748,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
                     boxShadow: type === t ? `2px 2px 0px ${C.black}` : "none",
                   }}
                 >
-                  {t === "Photo" ? "🖼 Photo" : "🎬 Video"}
+                  {t === "Photo" ? "Photo" : "Video"}
                 </button>
               ))}
             </div>
@@ -851,7 +873,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
             </div>
           </div>
 
-          {/* ── RIGHT: form fields ────────────────────────────────────────── */}
+          {/* RIGHT: form fields */}
           <div
             style={{
               flex: 1,
@@ -907,7 +929,8 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
                     e.target.style.background = C.surfaceAlt;
                     e.target.style.boxShadow = `3px 3px 0px ${C.black}`;
                     e.target.style.transform = "none";
-                  }} disabled
+                  }}
+                  disabled
                 />
               </div>
             </Field>
@@ -942,6 +965,120 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
               />
             </Field>
 
+            {/* ── Coordinates ──────────────────────────────────────────────── */}
+            <SectionDivider label="Coordinates" />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 12,
+              }}
+            >
+              <Field label="Latitude">
+                <input
+                  type="number"
+                  step="any"
+                  value={latitude}
+                  onChange={(e) => setLatitude(e.target.value)}
+                  placeholder="e.g. -7.9424"
+                  style={inputBase}
+                  {...focusHandlers}
+                />
+              </Field>
+              <Field label="Longitude">
+                <input
+                  type="number"
+                  step="any"
+                  value={longitude}
+                  onChange={(e) => setLongitude(e.target.value)}
+                  placeholder="e.g. 112.9530"
+                  style={inputBase}
+                  {...focusHandlers}
+                />
+              </Field>
+            </div>
+
+            {/* Map picker row */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                flexWrap: "wrap",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setLocationPickerOpen(true)}
+                style={{
+                  border: `2px solid ${C.black}`,
+                  background: hasCoords ? C.yellow : C.blue,
+                  color: C.black,
+                  padding: "7px 16px",
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontWeight: 700,
+                  fontSize: 11,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  cursor: "pointer",
+                  boxShadow: `2px 2px 0px ${C.black}`,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  transition: "all 0.1s ease",
+                  flexShrink: 0,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translate(2px,2px)";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "none";
+                  e.currentTarget.style.boxShadow = `2px 2px 0px ${C.black}`;
+                }}
+              >
+                 {hasCoords ? "Edit on Map" : "Pick on Map"}
+              </button>
+
+              {hasCoords && (
+                <>
+                  <span
+                    style={{
+                      fontFamily: "monospace",
+                      fontSize: 11,
+                      color: C.outlineVariant,
+                      background: C.surfaceContainerHigh,
+                      border: `1px solid ${C.outline}`,
+                      padding: "4px 10px",
+                    }}
+                  >
+                    {Number(latitude).toFixed(4)},{" "}
+                    {Number(longitude).toFixed(4)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLatitude("");
+                      setLongitude("");
+                    }}
+                    style={{
+                      border: "none",
+                      background: "transparent",
+                      cursor: "pointer",
+                      fontSize: 13,
+                      color: C.outline,
+                      padding: "4px 6px",
+                      fontWeight: 900,
+                    }}
+                    title="Clear coordinates"
+                  >
+                    ✕
+                  </button>
+                </>
+              )}
+            </div>
+
             {/* Description */}
             <Field label="Description">
               <Textarea
@@ -952,15 +1089,11 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
               />
             </Field>
 
-            {/* ── TAGS ──────────────────────────────────────────────────────── */}
+            {/* TAGS */}
             <SectionDivider label="Tags" />
 
             <Field
-              label={`Tags${
-                selectedTagIds.length
-                  ? ` · ${selectedTagIds.length} selected`
-                  : ""
-              }`}
+              label={`Tags${selectedTagIds.length ? ` · ${selectedTagIds.length} selected` : ""}`}
             >
               {loadingRelations ? (
                 <p
@@ -975,7 +1108,6 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
                 </p>
               ) : (
                 <>
-                  {/* Existing tag chips */}
                   {allTags.length === 0 ? (
                     <p
                       style={{
@@ -1000,19 +1132,55 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
                       ))}
                     </div>
                   )}
+                  {/* Inline tag creation */}
+                  <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                    <input
+                      type="text"
+                      value={newTagInput}
+                      onChange={(e) => setNewTagInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleCreateTag();
+                        }
+                      }}
+                      placeholder="New tag name…"
+                      style={{ ...inputBase, fontSize: 12, flex: 1 }}
+                      {...focusHandlers}
+                    />
+                    <button
+                      onClick={handleCreateTag}
+                      disabled={addingTag || !newTagInput.trim()}
+                      style={{
+                        border: `2px solid ${C.black}`,
+                        background: C.yellow,
+                        color: C.black,
+                        padding: "8px 14px",
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        fontWeight: 700,
+                        fontSize: 11,
+                        textTransform: "uppercase",
+                        cursor:
+                          addingTag || !newTagInput.trim()
+                            ? "not-allowed"
+                            : "pointer",
+                        opacity: addingTag || !newTagInput.trim() ? 0.5 : 1,
+                        flexShrink: 0,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      + Create
+                    </button>
+                  </div>
                 </>
               )}
             </Field>
 
-            {/* ── PEOPLE ────────────────────────────────────────────────────── */}
+            {/* PEOPLE */}
             <SectionDivider label="People in Frame" />
 
             <Field
-              label={`People${
-                selectedPersonIds.length
-                  ? ` · ${selectedPersonIds.length} tagged`
-                  : ""
-              }`}
+              label={`People${selectedPersonIds.length ? ` · ${selectedPersonIds.length} tagged` : ""}`}
             >
               {loadingRelations ? (
                 <p
@@ -1052,7 +1220,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
               )}
             </Field>
 
-            {/* ── Readonly meta ─────────────────────────────────────────────── */}
+            {/* Readonly meta */}
             <SectionDivider label="Meta" />
 
             <div
@@ -1063,13 +1231,13 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
               }}
             >
               <Field label="Cloudinary ID">
-                <Input value={memory.cloudinary_public_id || "—"} />
+                <Input value={memory.cloudinary_public_id || "—"} disabled />
               </Field>
             </div>
           </div>
         </div>
 
-        {/* ── Footer ───────────────────────────────────────────────────────── */}
+        {/* Footer */}
         <div
           style={{
             borderTop: `3px solid ${C.black}`,
@@ -1094,11 +1262,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
               ? uploading
                 ? "⏳ Uploading to Cloudinary…"
                 : "⏳ Saving…"
-              : `ID ${memory.id} · ${selectedTagIds.length} tag${
-                  selectedTagIds.length !== 1 ? "s" : ""
-                } · ${selectedPersonIds.length} person${
-                  selectedPersonIds.length !== 1 ? "s" : ""
-                }`}
+              : `ID ${memory.id} · ${selectedTagIds.length} tag${selectedTagIds.length !== 1 ? "s" : ""} · ${selectedPersonIds.length} person${selectedPersonIds.length !== 1 ? "s" : ""}${hasCoords ? " · pinned" : ""}`}
           </span>
 
           <div style={{ display: "flex", gap: 10 }}>
