@@ -1,6 +1,6 @@
-import { c as createComponent } from './astro-component_CJ15kxtp.mjs';
+import { c as createComponent } from './astro-component_Cm1CKSpY.mjs';
 import 'piccolore';
-import { j as addAttribute, s as renderHead, t as renderSlot, u as renderTemplate, p as maybeRenderHead } from './entrypoint_BVRuuQGF.mjs';
+import { h as addAttribute, q as renderHead, v as renderSlot, k as renderTemplate, m as maybeRenderHead } from './entrypoint_BLBYqHYh.mjs';
 import 'clsx';
 
 const $$Layout = createComponent(($$result, $$props, $$slots) => {
@@ -17,4 +17,4 @@ Pasha Archive
 Designed by <a href="https://github.com/mdwipasha" class="hover:text-black underline transition-all duration-300" target="_blank" rel="noopener noreferrer">Capa.</a> </div> </div> </footer>`;
 }, "C:/laragon/www/mdpashaaa-archive-web/src/components/Footer.astro", void 0);
 
-export { $$Footer as $, $$Layout as a };
+export { $$Layout as $, $$Footer as a };

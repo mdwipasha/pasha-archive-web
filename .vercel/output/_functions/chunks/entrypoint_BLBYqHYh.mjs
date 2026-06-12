@@ -1375,15 +1375,6 @@ const typeHandlers = /* @__PURE__ */ new Map([
 ]);
 const types = Array.from(typeHandlers.keys());
 
-nodePath.posix.join;
-
-const ASTRO_PATH_HEADER = "x-astro-path";
-const ASTRO_PATH_PARAM = "x_astro_path";
-const ASTRO_LOCALS_HEADER = "x-astro-locals";
-const ASTRO_MIDDLEWARE_SECRET_HEADER = "x-astro-middleware-secret";
-
-const middlewareSecret = "d43636d2-1099-4dc5-914b-a74f868997d1";
-
 function appendForwardSlash(path) {
   return path.endsWith("/") ? path : path + "/";
 }
@@ -1505,6 +1496,15 @@ const WITH_FILE_EXT = /\/[^/]+\.\w+$/;
 function hasFileExtension(path) {
   return WITH_FILE_EXT.test(path);
 }
+
+nodePath.posix.join;
+
+const ASTRO_PATH_HEADER = "x-astro-path";
+const ASTRO_PATH_PARAM = "x_astro_path";
+const ASTRO_LOCALS_HEADER = "x-astro-locals";
+const ASTRO_MIDDLEWARE_SECRET_HEADER = "x-astro-middleware-secret";
+
+const middlewareSecret = "f63de3a0-a52a-4a1a-9863-74fc7cae309c";
 
 const ACTION_QUERY_PARAMS = {
   actionName: "_action"};
@@ -1629,7 +1629,7 @@ function deserializeActionResult(res) {
         })
       };
     }
-    if (Object.assign(__vite_import_meta_env__$1, { OS: "Windows_NT" })?.PROD) {
+    if (Object.assign(__vite_import_meta_env__$1, { OS: "Windows_NT", Path: "C:\\laragon\\www\\mdpashaaa-archive-web\\node_modules\\.bin;C:\\laragon\\www\\node_modules\\.bin;C:\\laragon\\node_modules\\.bin;C:\\node_modules\\.bin;C:\\Program Files\\nodejs\\node_modules\\npm\\node_modules\\@npmcli\\run-script\\lib\\node-gyp-bin;c:\\Users\\User\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\debugCommand;c:\\Users\\User\\AppData\\Roaming\\Code\\User\\globalStorage\\github.copilot-chat\\copilotCli;C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.16.8-hotspot\\bin;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\dotnet\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\nodejs\\;C:\\xampp\\php;C:\\ProgramData\\ComposerSetup\\bin;C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.16.8-hotspot\\bin;C:\\Program Files\\Cloudflare\\Cloudflare WARP\\;C:\\Program Files (x86)\\dotnet\\;C:\\Program Files (x86)\\ZeroTier\\One\\;C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\;C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python313\\;C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Launcher\\;C:\\Users\\User\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\User\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\User\\AppData\\Roaming\\npm;C:\\Users\\User\\AppData\\Roaming\\Composer\\vendor\\bin;C:\\Users\\User\\AppData\\Local\\Android\\Sdk;C:\\Users\\User\\AppData\\Local\\Android\\Sdk\\platform-tools;F:\\flutter\\bin;C:\\Users\\User\\AppData\\Local\\Programs\\Antigravity\\bin;;C:\\Users\\User\\AppData\\Local\\spicetify;C:\\Users\\User\\AppData\\Local\\Programs\\Antigravity IDE\\bin" })?.PROD) {
       return { error: ActionError.fromJson(json), data: void 0 };
     } else {
       const error = ActionError.fromJson(json);
@@ -1684,7 +1684,7 @@ function shouldAppendForwardSlash(trailingSlash, buildFormat) {
   }
 }
 
-const ASTRO_VERSION = "6.3.8";
+const ASTRO_VERSION = "6.4.6";
 const ASTRO_GENERATOR = `Astro v${ASTRO_VERSION}`;
 const REROUTE_DIRECTIVE_HEADER = "X-Astro-Reroute";
 const REWRITE_DIRECTIVE_HEADER_KEY = "X-Astro-Rewrite";
@@ -2522,7 +2522,7 @@ function copyRequest(newUrl, oldRequest, isPrerendered, logger, routePattern) {
       signal: oldRequest.signal,
       keepalive: oldRequest.keepalive,
       // https://fetch.spec.whatwg.org/#dom-request-duplex
-      // @ts-expect-error It isn't part of the types, but undici accepts it and it allows to carry over the body to a new request
+      // @ts-expect-error It isn't part of the types, but undici accepts it and it allows carrying over the body to a new request
       duplex: "half"
     }
   });
@@ -2720,7 +2720,7 @@ function validateDynamicRouteModule(mod, {
   ssr,
   route
 }) {
-  if ((!ssr || route.prerender) && !mod.getStaticPaths) {
+  if ((!ssr || route.prerender) && route.origin !== "internal" && !mod.getStaticPaths) {
     throw new AstroError({
       ...GetStaticPathsRequired,
       location: { file: route.component }
@@ -2844,7 +2844,7 @@ async function callGetStaticPaths({
     return cached.staticPaths;
   }
   validateDynamicRouteModule(mod, { ssr, route });
-  if (ssr && !route.prerender) {
+  if (ssr && !route.prerender || route.origin === "internal") {
     const entry = Object.assign([], { keyed: /* @__PURE__ */ new Map() });
     routeCache.set(route, { ...cached, mod, staticPaths: entry });
     return entry;
@@ -3520,6 +3520,7 @@ const htmlBooleanAttributes = /^(?:allowfullscreen|async|autofocus|autoplay|chec
 const AMPERSAND_REGEX = /&/g;
 const DOUBLE_QUOTE_REGEX = /"/g;
 const STATIC_DIRECTIVES = /* @__PURE__ */ new Set(["set:html", "set:text"]);
+const INVALID_ATTR_NAME_CHAR = /[\s"'>/=]/;
 const toIdent = (k) => k.trim().replace(/(?!^)\b\w|\s+|\W+/g, (match, index) => {
   if (/\W/.test(match)) return "";
   return index === 0 ? match : match.toUpperCase();
@@ -3555,6 +3556,9 @@ function handleBooleanAttribute(key, value, shouldEscape, tagName) {
 }
 function addAttribute(value, key, shouldEscape = true, tagName = "") {
   if (value == null) {
+    return "";
+  }
+  if (INVALID_ATTR_NAME_CHAR.test(key)) {
     return "";
   }
   if (STATIC_DIRECTIVES.has(key)) {
@@ -3728,11 +3732,7 @@ function renderAllHeadContent(result) {
     (link) => renderElement$1("link", link, false)
   );
   content += styles.join("\n") + links.join("\n") + scripts.join("\n");
-  if (result._metadata.extraHead.length > 0) {
-    for (const part of result._metadata.extraHead) {
-      content += part;
-    }
-  }
+  content += result._metadata.extraHead.join("");
   return markHTMLString(content);
 }
 function renderHead() {
@@ -6044,6 +6044,9 @@ function getFallbackRoute(route, routeList) {
   }
   return fallbackRoute.routeData;
 }
+function getCustom404Route(manifestData) {
+  return manifestData.routes.find((r) => isRoute404(r.route));
+}
 function routeHasHtmlExtension(route) {
   return route.segments.some(
     (segment) => segment.some((part) => !part.dynamic && part.content.includes(".html"))
@@ -6077,7 +6080,7 @@ async function getProps(opts) {
   });
   const params = getParams(route, pathname);
   const matchedStaticPath = findPathItemByKey(staticPaths, params, route, logger, trailingSlash);
-  if (!matchedStaticPath && (serverLike ? route.prerender : true)) {
+  if (!matchedStaticPath && route.origin !== "internal" && (serverLike ? route.prerender : true)) {
     throw new AstroError({
       ...NoMatchingStaticPathFound,
       message: NoMatchingStaticPathFound.message(pathname),
@@ -6228,6 +6231,34 @@ class Router {
     }
     const params = getParams(route, pathname);
     return { type: "match", route, params, pathname };
+  }
+  /**
+   * Returns all routes that match the given pathname, in priority order.
+   * Used when the first match (e.g. a prerendered route) cannot serve
+   * the request and subsequent matches need to be tried.
+   */
+  matchAll(inputPathname, { allowWithoutBase = false } = {}) {
+    const normalized = getRedirectForPathname(inputPathname);
+    if (normalized.redirect) {
+      return [];
+    }
+    const baseResult = stripBase(
+      normalized.pathname,
+      this.#base,
+      this.#baseWithoutTrailingSlash,
+      this.#trailingSlash
+    );
+    if (!baseResult && !allowWithoutBase) {
+      return [];
+    }
+    let pathname = baseResult ?? normalized.pathname;
+    if (this.#buildFormat === "file") {
+      pathname = normalizeFileFormatPathname(pathname);
+    }
+    return this.#routes.filter((candidate) => {
+      if (candidate.pattern.test(pathname)) return true;
+      return candidate.fallbackRoutes.some((fallbackRoute) => fallbackRoute.pattern.test(pathname));
+    });
   }
 }
 function normalizeBase(base) {
@@ -6753,7 +6784,7 @@ class AstroLogger {
     }
   }
   /**
-   * It calls the `flush` function of the provided destinatin, if it exists.
+   * It calls the `flush` function of the provided destination, if it exists.
    */
   flush() {
     if (this.options.destination.flush) {
@@ -6987,6 +7018,7 @@ const PipelineFeatures = {
   i18n: 1 << 4,
   cache: 1 << 5
 };
+const ALL_PIPELINE_FEATURES = PipelineFeatures.redirects | PipelineFeatures.sessions | PipelineFeatures.actions | PipelineFeatures.middleware | PipelineFeatures.i18n | PipelineFeatures.cache;
 class Pipeline {
   internalMiddleware;
   resolvedMiddleware = void 0;
@@ -7088,6 +7120,15 @@ class Pipeline {
     const match = this.#router.match(pathname, { allowWithoutBase: true });
     if (match.type !== "match") return void 0;
     return match.route;
+  }
+  /**
+   * Returns all routes matching the given pathname, in priority order.
+   * Used when the first match cannot serve the request (e.g. a
+   * prerendered dynamic route that doesn't cover this specific path)
+   * and the caller needs to try subsequent matches.
+   */
+  matchAllRoutes(pathname) {
+    return this.#router.matchAll(pathname, { allowWithoutBase: true });
   }
   /**
    * Rebuilds the internal router after routes have been added or
@@ -7584,6 +7625,9 @@ class I18n {
     state.pipeline.usedFeatures |= PipelineFeatures.i18n;
     const i18n = this.#i18n;
     const typeHeader = response.headers.get(ROUTE_TYPE_HEADER);
+    if (typeHeader) {
+      response.headers.delete(ROUTE_TYPE_HEADER);
+    }
     const isReroute = response.headers.get(REROUTE_DIRECTIVE_HEADER);
     if (isReroute === "no" && typeof i18n.fallback === "undefined") {
       return response;
@@ -7979,9 +8023,6 @@ class AstroMiddleware {
     return response;
   }
   #finalize(state, response) {
-    if (response.headers.get(ROUTE_TYPE_HEADER)) {
-      response.headers.delete(ROUTE_TYPE_HEADER);
-    }
     attachCookiesToResponse(response, state.cookies);
     return response;
   }
@@ -8168,12 +8209,147 @@ function isRouteServerIsland(route) {
   return route.component === SERVER_ISLAND_COMPONENT;
 }
 
+function computePathnameFromDomain(request, url, i18n, base, trailingSlash, logger) {
+  let pathname = void 0;
+  if (i18n && (i18n.strategy === "domains-prefix-always" || i18n.strategy === "domains-prefix-other-locales" || i18n.strategy === "domains-prefix-always-no-redirect")) {
+    let host = request.headers.get("X-Forwarded-Host");
+    let protocol = request.headers.get("X-Forwarded-Proto");
+    if (protocol) {
+      protocol = protocol + ":";
+    } else {
+      protocol = url.protocol;
+    }
+    if (!host) {
+      host = request.headers.get("Host");
+    }
+    if (host && protocol) {
+      host = host.split(":")[0];
+      try {
+        let locale;
+        const hostAsUrl = new URL(`${protocol}//${host}`);
+        for (const [domainKey, localeValue] of Object.entries(i18n.domainLookupTable)) {
+          const domainKeyAsUrl = new URL(domainKey);
+          if (hostAsUrl.host === domainKeyAsUrl.host && hostAsUrl.protocol === domainKeyAsUrl.protocol) {
+            locale = localeValue;
+            break;
+          }
+        }
+        if (locale) {
+          pathname = prependForwardSlash(
+            joinPaths(normalizeTheLocale(locale), removeBase(url.pathname, base))
+          );
+          if (trailingSlash === "always") {
+            pathname = appendForwardSlash(pathname);
+          } else if (trailingSlash === "never") {
+            pathname = removeTrailingForwardSlash(pathname);
+          } else if (url.pathname.endsWith("/")) {
+            pathname = appendForwardSlash(pathname);
+          }
+        }
+      } catch (e) {
+        logger.error(
+          "router",
+          `Astro tried to parse ${protocol}//${host} as an URL, but it threw a parsing error. Check the X-Forwarded-Host and X-Forwarded-Proto headers.`
+        );
+        logger.error("router", `Error: ${e}`);
+      }
+    }
+  }
+  return pathname;
+}
+function removeBase(pathname, base) {
+  pathname = collapseDuplicateLeadingSlashes(pathname);
+  if (pathname.startsWith(base)) {
+    return pathname.slice(removeTrailingForwardSlash(base).length + 1);
+  }
+  return pathname;
+}
+
 const renderOptionsSymbol = /* @__PURE__ */ Symbol.for("astro.renderOptions");
 function getRenderOptions(request) {
   return Reflect.get(request, renderOptionsSymbol);
 }
 function setRenderOptions(request, options) {
   Reflect.set(request, renderOptionsSymbol, options);
+}
+
+function getFirstForwardedValue$1(multiValueHeader) {
+  return multiValueHeader?.toString().split(",").map((e) => e.trim())[0];
+}
+function sanitizeHost(hostname) {
+  if (!hostname) return void 0;
+  if (/[/\\]/.test(hostname)) return void 0;
+  return hostname;
+}
+function parseHost(host) {
+  const parts = host.split(":");
+  return {
+    hostname: parts[0],
+    port: parts[1]
+  };
+}
+function matchesAllowedDomains(hostname, protocol, port, allowedDomains) {
+  const hostWithPort = port ? `${hostname}:${port}` : hostname;
+  const urlString = `${protocol}://${hostWithPort}`;
+  if (!URL.canParse(urlString)) {
+    return false;
+  }
+  const testUrl = new URL(urlString);
+  return allowedDomains.some((pattern) => matchPattern(testUrl, pattern));
+}
+function validateHost(host, protocol, allowedDomains) {
+  if (!host || host.length === 0) return void 0;
+  if (!allowedDomains || allowedDomains.length === 0) return void 0;
+  const sanitized = sanitizeHost(host);
+  if (!sanitized) return void 0;
+  const { hostname, port } = parseHost(sanitized);
+  if (matchesAllowedDomains(hostname, protocol, port, allowedDomains)) {
+    return sanitized;
+  }
+  return void 0;
+}
+function validateForwardedHeaders(forwardedProtocol, forwardedHost, forwardedPort, allowedDomains) {
+  const result = {};
+  if (forwardedProtocol) {
+    if (allowedDomains && allowedDomains.length > 0) {
+      const hasProtocolPatterns = allowedDomains.some((pattern) => pattern.protocol !== void 0);
+      if (hasProtocolPatterns) {
+        try {
+          const testUrl = new URL(`${forwardedProtocol}://example.com`);
+          const isAllowed = allowedDomains.some(
+            (pattern) => matchPattern(testUrl, { protocol: pattern.protocol })
+          );
+          if (isAllowed) {
+            result.protocol = forwardedProtocol;
+          }
+        } catch {
+        }
+      } else if (/^https?$/.test(forwardedProtocol)) {
+        result.protocol = forwardedProtocol;
+      }
+    }
+  }
+  if (forwardedPort && allowedDomains && allowedDomains.length > 0) {
+    const hasPortPatterns = allowedDomains.some((pattern) => pattern.port !== void 0);
+    if (hasPortPatterns) {
+      const isAllowed = allowedDomains.some((pattern) => pattern.port === forwardedPort);
+      if (isAllowed) {
+        result.port = forwardedPort;
+      }
+    }
+  }
+  if (forwardedHost && forwardedHost.length > 0 && allowedDomains && allowedDomains.length > 0) {
+    const protoForValidation = result.protocol || "https";
+    const sanitized = sanitizeHost(forwardedHost);
+    if (sanitized) {
+      const { hostname, port: portFromHost } = parseHost(sanitized);
+      const portForValidation = result.port || portFromHost;
+      if (matchesAllowedDomains(hostname, protoForValidation, portForValidation, allowedDomains)) {
+        result.host = sanitized;
+      }
+    }
+  }
+  return result;
 }
 
 class FetchState {
@@ -8271,6 +8447,13 @@ class FetchState {
   #rewrites;
   /** Memoized Astro page partial. */
   #astroPagePartial;
+  /**
+   * Locale-prefixed pathname derived from the Host header for domain-based
+   * i18n routing (e.g. `/en/boats/1/foo`), or `undefined` when the request
+   * isn't served from a locale-mapped domain. When set, `this.pathname` is
+   * derived from it so locale/param resolution match the route pattern.
+   */
+  #domainPathname;
   /** Memoized current locale. */
   #currentLocale;
   /** Memoized preferred locale. */
@@ -8293,15 +8476,35 @@ class FetchState {
     this.componentInstance = void 0;
     this.slots = void 0;
     const url = new URL(request.url);
-    this.pathname = this.#computePathname(url);
+    const domainPathname = computePathnameFromDomain(
+      request,
+      url,
+      pipeline.manifest.i18n,
+      pipeline.manifest.base,
+      pipeline.manifest.trailingSlash,
+      pipeline.logger
+    );
+    if (domainPathname) {
+      this.#domainPathname = domainPathname;
+      try {
+        this.pathname = decodeURI(domainPathname);
+      } catch {
+        this.pathname = domainPathname;
+      }
+    } else {
+      this.pathname = this.#computePathname(url);
+    }
     this.timeStart = performance.now();
     this.clientAddress = options?.clientAddress;
     this.locals = options?.locals ?? {};
     this.url = normalizeUrl(url);
     this.cookies = new AstroCookies(request);
-    if (!Reflect.get(request, originPathnameSymbol)) {
+    if (pipeline.manifest.allowedDomains && pipeline.manifest.allowedDomains.length > 0) {
+      this.#applyForwardedHeaders();
+    }
+    if (!Reflect.get(this.request, originPathnameSymbol)) {
       setOriginPathname(
-        request,
+        this.request,
         this.pathname,
         pipeline.manifest.trailingSlash,
         pipeline.manifest.buildFormat
@@ -8553,10 +8756,8 @@ class FetchState {
     }
     return {
       insertDirective(payload) {
-        if (state?.result?.directives) {
+        if (state.result) {
           state.result.directives = pushDirective(state.result.directives, payload);
-        } else {
-          state?.result?.directives.push(payload);
         }
       },
       insertScriptResource(resource) {
@@ -8596,7 +8797,9 @@ class FetchState {
       }
     } else {
       let pathname = routeData.pathname;
-      if (url && !routeData.pattern.test(url.pathname)) {
+      if (this.#domainPathname) {
+        pathname = this.pathname;
+      } else if (url && !routeData.pattern.test(url.pathname)) {
         for (const fallbackRoute of routeData.fallbackRoutes) {
           if (fallbackRoute.pattern.test(url.pathname)) {
             pathname = fallbackRoute.pathname;
@@ -8723,11 +8926,14 @@ class FetchState {
    */
   /**
    * Strip `.html` / `/index.html` suffixes from the pathname so the
-   * rendering pipeline sees the canonical route path. Skipped when the
-   * matched route itself has an `.html` extension in its definition.
+   * rendering pipeline sees the canonical route path. Only applies to
+   * page routes where `.html` is framework-injected. Endpoint routes
+   * preserve `.html` because any such suffix is user-provided (e.g.
+   * from `getStaticPaths` params). Skipped when the matched route
+   * itself has an `.html` extension in its definition.
    */
   #stripHtmlExtension() {
-    if (this.routeData && !routeHasHtmlExtension(this.routeData)) {
+    if (this.routeData && this.routeData.type === "page" && !routeHasHtmlExtension(this.routeData)) {
       this.pathname = this.pathname.replace(/\/index\.html$/, "/").replace(/\.html$/, "");
     }
   }
@@ -8739,16 +8945,22 @@ class FetchState {
     }
     const matched = pipeline.matchRoute(this.pathname);
     if (matched && matched.prerender && pipeline.manifest.serverLike) {
-      this.routeData = void 0;
+      if (matched.params.length > 0) {
+        const allMatches = pipeline.matchAllRoutes(this.pathname);
+        this.routeData = allMatches.find((r) => !r.prerender);
+      } else {
+        this.routeData = void 0;
+      }
     } else {
       this.routeData = matched;
     }
     pipeline.logger.debug("router", "Astro matched the following route for " + this.request.url);
     pipeline.logger.debug("router", "RouteData:\n" + this.routeData);
     if (!this.routeData) {
-      this.routeData = pipeline.manifestData.routes.find(
-        (route) => route.component === "404.astro" || route.component === DEFAULT_404_COMPONENT
-      );
+      const custom404 = getCustom404Route(pipeline.manifestData);
+      if (custom404 && !custom404.prerender) {
+        this.routeData = custom404;
+      }
     }
     if (!this.routeData) {
       pipeline.logger.debug("router", "Astro hasn't found routes that match " + this.request.url);
@@ -8779,6 +8991,57 @@ class FetchState {
     } catch (e) {
       this.pipeline.logger.error(null, e.toString());
       return pathname;
+    }
+  }
+  /**
+   * Reads X-Forwarded-Proto, X-Forwarded-Host, and X-Forwarded-Port
+   * from the request headers, validates them against the manifest's
+   * `allowedDomains`, and updates `this.url` accordingly. Also resolves
+   * `clientAddress` from X-Forwarded-For when the host is trusted.
+   *
+   * Only called when `allowedDomains` is configured — without it,
+   * forwarded headers are never trusted.
+   */
+  #applyForwardedHeaders() {
+    const headers = this.request.headers;
+    const allowedDomains = this.pipeline.manifest.allowedDomains;
+    const validated = validateForwardedHeaders(
+      getFirstForwardedValue$1(headers.get("x-forwarded-proto") ?? void 0),
+      getFirstForwardedValue$1(headers.get("x-forwarded-host") ?? void 0),
+      getFirstForwardedValue$1(headers.get("x-forwarded-port") ?? void 0),
+      allowedDomains
+    );
+    if (!validated.protocol && !validated.host && !validated.port) return;
+    if (validated.protocol) {
+      this.url.protocol = validated.protocol + ":";
+    }
+    if (validated.host) {
+      const colonIdx = validated.host.indexOf(":");
+      if (colonIdx !== -1) {
+        this.url.hostname = validated.host.slice(0, colonIdx);
+        this.url.port = validated.host.slice(colonIdx + 1);
+      } else {
+        this.url.hostname = validated.host;
+        this.url.port = "";
+      }
+    }
+    if (validated.port) {
+      this.url.port = validated.port;
+    }
+    const hostTrusted = validated.host !== void 0;
+    if (hostTrusted && !this.clientAddress) {
+      const forwardedFor = getFirstForwardedValue$1(
+        this.request.headers.get("x-forwarded-for") ?? void 0
+      );
+      if (forwardedFor) {
+        this.clientAddress = forwardedFor;
+      }
+    }
+    const oldRequest = this.request;
+    this.request = new Request(this.url, oldRequest);
+    const app = Reflect.get(oldRequest, appSymbol);
+    if (app !== void 0) {
+      Reflect.set(this.request, appSymbol, app);
     }
   }
   /**
@@ -9804,6 +10067,7 @@ class AstroHandler {
     return this.#pagesHandler.handle(state, ctx);
   }
   async handle(state) {
+    state.pipeline.usedFeatures |= ALL_PIPELINE_FEATURES;
     const trailingSlashRedirect = this.#trailingSlashHandler.handle(state);
     if (trailingSlashRedirect) {
       return trailingSlashRedirect;
@@ -9973,15 +10237,27 @@ class DefaultErrorHandler {
     if (errorRouteData) {
       if (errorRouteData.prerender) {
         const maybeDotHtml = errorRouteData.route.endsWith(`/${status}`) ? ".html" : "";
-        const statusURL = new URL(`${app.baseWithoutTrailingSlash}/${status}${maybeDotHtml}`, url);
+        const allowedDomains = app.manifest.allowedDomains;
+        const validatedHost = validateHost(url.host, url.protocol.replace(":", ""), allowedDomains);
+        const safeOrigin = validatedHost ? url.origin : `${url.protocol}//localhost`;
+        const statusURL = new URL(
+          `${app.baseWithoutTrailingSlash}/${status}${maybeDotHtml}`,
+          safeOrigin
+        );
         if (statusURL.toString() !== request.url && resolvedRenderOptions.prerenderedErrorPageFetch) {
-          const response2 = await resolvedRenderOptions.prerenderedErrorPageFetch(
-            statusURL.toString()
-          );
-          const override = { status, removeContentEncodingHeaders: true };
-          const newResponse = mergeResponses(response2, originalResponse, override);
-          prepareResponse(newResponse, resolvedRenderOptions);
-          return newResponse;
+          try {
+            const response2 = await resolvedRenderOptions.prerenderedErrorPageFetch(
+              statusURL.toString()
+            );
+            const override = { status, removeContentEncodingHeaders: true };
+            const newResponse = mergeResponses(response2, originalResponse, override);
+            prepareResponse(newResponse, resolvedRenderOptions);
+            return newResponse;
+          } catch {
+            const response2 = mergeResponses(new Response(null, { status }), originalResponse);
+            prepareResponse(response2, resolvedRenderOptions);
+            return response2;
+          }
         }
       }
       const mod = await app.pipeline.getComponentByRoute(errorRouteData);
@@ -10111,11 +10387,9 @@ class BaseApp {
     return this.pipeline.logger;
   }
   get adapterLogger() {
-    if (!this.#adapterLogger) {
-      this.#adapterLogger = new AstroIntegrationLogger(
-        this.logger.options,
-        this.manifest.adapterName
-      );
+    const currentOptions = this.logger.options;
+    if (!this.#adapterLogger || this.#adapterLogger.options !== currentOptions) {
+      this.#adapterLogger = new AstroIntegrationLogger(currentOptions, this.manifest.adapterName);
     }
     return this.#adapterLogger;
   }
@@ -10182,18 +10456,29 @@ class BaseApp {
     return pathname;
   }
   /**
+   * Decodes a pathname with `decodeURI`, falling back to the raw pathname when it
+   * contains an invalid percent-sequence (e.g. `%C0%AF`, an overlong-UTF-8 encoding of
+   * `/` commonly sent by path-traversal scanners). A raw `decodeURI()` would throw
+   * `URIError: URI malformed`, and because `match()` runs before `render()` that error
+   * escapes the adapter's request handler as an uncaught exception (HTTP 500) that user
+   * middleware can't catch.
+   */
+  safeDecodeURI(pathname) {
+    try {
+      return decodeURI(pathname);
+    } catch (e) {
+      this.adapterLogger.debug(e.toString());
+      return pathname;
+    }
+  }
+  /**
    * Extracts the base-stripped, decoded pathname from a request.
    * Used by adapters to compute the pathname for dev-mode route matching.
    */
   getPathnameFromRequest(request) {
     const url = new URL(request.url);
     const pathname = prependForwardSlash(this.removeBase(url.pathname));
-    try {
-      return decodeURI(pathname);
-    } catch (e) {
-      this.adapterLogger.error(e.toString());
-      return pathname;
-    }
+    return this.safeDecodeURI(pathname);
   }
   /**
    * Given a `Request`, it returns the `RouteData` that matches its `pathname`. By default, prerendered
@@ -10210,12 +10495,16 @@ class BaseApp {
     if (!pathname) {
       pathname = prependForwardSlash(this.removeBase(url.pathname));
     }
-    const routeData = this.pipeline.matchRoute(decodeURI(pathname));
+    const routeData = this.pipeline.matchRoute(this.safeDecodeURI(pathname));
     if (!routeData) return void 0;
     if (allowPrerenderedRoutes) {
       return routeData;
     }
     if (routeData.prerender) {
+      if (routeData.params.length > 0) {
+        const allMatches = this.pipeline.matchAllRoutes(this.safeDecodeURI(pathname));
+        return allMatches.find((r) => !r.prerender);
+      }
       return void 0;
     }
     return routeData;
@@ -10230,55 +10519,14 @@ class BaseApp {
     return void 0;
   }
   computePathnameFromDomain(request) {
-    let pathname = void 0;
-    const url = new URL(request.url);
-    if (this.manifest.i18n && (this.manifest.i18n.strategy === "domains-prefix-always" || this.manifest.i18n.strategy === "domains-prefix-other-locales" || this.manifest.i18n.strategy === "domains-prefix-always-no-redirect")) {
-      let host = request.headers.get("X-Forwarded-Host");
-      let protocol = request.headers.get("X-Forwarded-Proto");
-      if (protocol) {
-        protocol = protocol + ":";
-      } else {
-        protocol = url.protocol;
-      }
-      if (!host) {
-        host = request.headers.get("Host");
-      }
-      if (host && protocol) {
-        host = host.split(":")[0];
-        try {
-          let locale;
-          const hostAsUrl = new URL(`${protocol}//${host}`);
-          for (const [domainKey, localeValue] of Object.entries(
-            this.manifest.i18n.domainLookupTable
-          )) {
-            const domainKeyAsUrl = new URL(domainKey);
-            if (hostAsUrl.host === domainKeyAsUrl.host && hostAsUrl.protocol === domainKeyAsUrl.protocol) {
-              locale = localeValue;
-              break;
-            }
-          }
-          if (locale) {
-            pathname = prependForwardSlash(
-              joinPaths(normalizeTheLocale(locale), this.removeBase(url.pathname))
-            );
-            if (this.manifest.trailingSlash === "always") {
-              pathname = appendForwardSlash(pathname);
-            } else if (this.manifest.trailingSlash === "never") {
-              pathname = removeTrailingForwardSlash(pathname);
-            } else if (url.pathname.endsWith("/")) {
-              pathname = appendForwardSlash(pathname);
-            }
-          }
-        } catch (e) {
-          this.logger.error(
-            "router",
-            `Astro tried to parse ${protocol}//${host} as an URL, but it threw a parsing error. Check the X-Forwarded-Host and X-Forwarded-Proto headers.`
-          );
-          this.logger.error("router", `Error: ${e}`);
-        }
-      }
-    }
-    return pathname;
+    return computePathnameFromDomain(
+      request,
+      new URL(request.url),
+      this.manifest.i18n,
+      this.manifest.base,
+      this.manifest.trailingSlash,
+      this.logger
+    );
   }
   async render(request, {
     addCookieHeader = false,
@@ -10319,7 +10567,7 @@ class BaseApp {
     if (!routeData) {
       const domainPathname = this.computePathnameFromDomain(request);
       if (domainPathname) {
-        routeData = this.pipeline.matchRoute(decodeURI(domainPathname));
+        routeData = this.pipeline.matchRoute(this.safeDecodeURI(domainPathname));
       }
     }
     const resolvedOptions = {
@@ -10868,14 +11116,14 @@ const renderers = [Object.assign({"name":"@astrojs/react","clientEntrypoint":"@a
 const serializedData = [{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"type":"page","component":"_server-islands.astro","params":["name"],"segments":[[{"content":"_server-islands","dynamic":false,"spread":false}],[{"content":"name","dynamic":true,"spread":false}]],"pattern":"^\\/_server-islands\\/([^/]+?)\\/?$","prerender":false,"isIndex":false,"fallbackRoutes":[],"route":"/_server-islands/[name]","origin":"internal","distURL":[],"_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/_image","component":"node_modules/astro/dist/assets/endpoint/generic.js","params":[],"pathname":"/_image","pattern":"^\\/_image\\/?$","segments":[[{"content":"_image","dynamic":false,"spread":false}]],"type":"endpoint","prerender":false,"fallbackRoutes":[],"distURL":[],"isIndex":false,"origin":"internal","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/404","isIndex":false,"type":"page","pattern":"^\\/404\\/?$","segments":[[{"content":"404","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/404.astro","pathname":"/404","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/about","isIndex":false,"type":"page","pattern":"^\\/about\\/?$","segments":[[{"content":"about","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/about.astro","pathname":"/about","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/admin","isIndex":true,"type":"page","pattern":"^\\/admin\\/?$","segments":[[{"content":"admin","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/admin/index.astro","pathname":"/admin","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/api/cloudinary/delete","isIndex":false,"type":"endpoint","pattern":"^\\/api\\/cloudinary\\/delete\\/?$","segments":[[{"content":"api","dynamic":false,"spread":false}],[{"content":"cloudinary","dynamic":false,"spread":false}],[{"content":"delete","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/api/cloudinary/delete.js","pathname":"/api/cloudinary/delete","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/galleries/[item]","isIndex":false,"type":"page","pattern":"^\\/galleries\\/([^/]+?)\\/?$","segments":[[{"content":"galleries","dynamic":false,"spread":false}],[{"content":"item","dynamic":true,"spread":false}]],"params":["item"],"component":"src/pages/galleries/[item].astro","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/galleries","isIndex":true,"type":"page","pattern":"^\\/galleries\\/?$","segments":[[{"content":"galleries","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/galleries/index.astro","pathname":"/galleries","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/","isIndex":true,"type":"page","pattern":"^\\/$","segments":[],"params":[],"component":"src/pages/index.astro","pathname":"/","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}}];
 				serializedData.map(deserializeRouteInfo);
 
-const _page0 = () => import('./generic_XFsqQwu3.mjs').then(n => n.g);
-const _page1 = () => import('./404_rWUgEUsv.mjs');
-const _page2 = () => import('./about_NcYC9Q2H.mjs');
-const _page3 = () => import('./index_DlsbiC5J.mjs');
+const _page0 = () => import('./generic_DBZbVetP.mjs').then(n => n.g);
+const _page1 = () => import('./404_DrPG8m0C.mjs');
+const _page2 = () => import('./about_BUoWC15f.mjs');
+const _page3 = () => import('./index_Bdc42RV-.mjs');
 const _page4 = () => import('./delete_DAj01iNu.mjs');
-const _page5 = () => import('./_item__DVtzxD04.mjs');
-const _page6 = () => import('./index_CWAD6YcY.mjs');
-const _page7 = () => import('./index_COocxMB1.mjs');
+const _page5 = () => import('./_item__BcQh0HOl.mjs');
+const _page6 = () => import('./index_z2jMMX7N.mjs');
+const _page7 = () => import('./index_CRZlRtC6.mjs');
 const pageMap = new Map([
     ["node_modules/astro/dist/assets/endpoint/generic.js", _page0],
     ["src/pages/404.astro", _page1],
@@ -10887,7 +11135,7 @@ const pageMap = new Map([
     ["src/pages/index.astro", _page7]
 ]);
 
-const _manifest = deserializeManifest(({"rootDir":"file:///C:/laragon/www/mdpashaaa-archive-web/","cacheDir":"file:///C:/laragon/www/mdpashaaa-archive-web/node_modules/.astro/","outDir":"file:///C:/laragon/www/mdpashaaa-archive-web/dist/","srcDir":"file:///C:/laragon/www/mdpashaaa-archive-web/src/","publicDir":"file:///C:/laragon/www/mdpashaaa-archive-web/public/","buildClientDir":"file:///C:/laragon/www/mdpashaaa-archive-web/dist/client/","buildServerDir":"file:///C:/laragon/www/mdpashaaa-archive-web/dist/server/","adapterName":"@astrojs/vercel","assetsDir":"_astro","routes":[{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"type":"page","component":"_server-islands.astro","params":["name"],"segments":[[{"content":"_server-islands","dynamic":false,"spread":false}],[{"content":"name","dynamic":true,"spread":false}]],"pattern":"^\\/_server-islands\\/([^/]+?)\\/?$","prerender":false,"isIndex":false,"fallbackRoutes":[],"route":"/_server-islands/[name]","origin":"internal","distURL":[],"_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/_image","component":"node_modules/astro/dist/assets/endpoint/generic.js","params":[],"pathname":"/_image","pattern":"^\\/_image\\/?$","segments":[[{"content":"_image","dynamic":false,"spread":false}]],"type":"endpoint","prerender":false,"fallbackRoutes":[],"distURL":[],"isIndex":false,"origin":"internal","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[{"type":"external","src":"_astro/Footer.De7wnojB.css"}],"routeData":{"route":"/404","isIndex":false,"type":"page","pattern":"^\\/404\\/?$","segments":[[{"content":"404","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/404.astro","pathname":"/404","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[{"type":"external","src":"_astro/Footer.De7wnojB.css"}],"routeData":{"route":"/about","isIndex":false,"type":"page","pattern":"^\\/about\\/?$","segments":[[{"content":"about","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/about.astro","pathname":"/about","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[{"type":"external","src":"_astro/Footer.De7wnojB.css"}],"routeData":{"route":"/admin","isIndex":true,"type":"page","pattern":"^\\/admin\\/?$","segments":[[{"content":"admin","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/admin/index.astro","pathname":"/admin","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/api/cloudinary/delete","isIndex":false,"type":"endpoint","pattern":"^\\/api\\/cloudinary\\/delete\\/?$","segments":[[{"content":"api","dynamic":false,"spread":false}],[{"content":"cloudinary","dynamic":false,"spread":false}],[{"content":"delete","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/api/cloudinary/delete.js","pathname":"/api/cloudinary/delete","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[{"type":"external","src":"_astro/Footer.De7wnojB.css"}],"routeData":{"route":"/galleries/[item]","isIndex":false,"type":"page","pattern":"^\\/galleries\\/([^/]+?)\\/?$","segments":[[{"content":"galleries","dynamic":false,"spread":false}],[{"content":"item","dynamic":true,"spread":false}]],"params":["item"],"component":"src/pages/galleries/[item].astro","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[{"type":"external","src":"_astro/Footer.De7wnojB.css"}],"routeData":{"route":"/galleries","isIndex":true,"type":"page","pattern":"^\\/galleries\\/?$","segments":[[{"content":"galleries","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/galleries/index.astro","pathname":"/galleries","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[{"type":"external","src":"_astro/Footer.De7wnojB.css"},{"type":"external","src":"_astro/MemoriesMap.CIGW-MKW.css"}],"routeData":{"route":"/","isIndex":true,"type":"page","pattern":"^\\/$","segments":[],"params":[],"component":"src/pages/index.astro","pathname":"/","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}}],"serverLike":true,"middlewareMode":"classic","base":"/","trailingSlash":"ignore","compressHTML":true,"experimentalQueuedRendering":{"enabled":false,"poolSize":0,"contentCache":false},"componentMetadata":[["C:/laragon/www/mdpashaaa-archive-web/src/pages/404.astro",{"propagation":"none","containsHead":true}],["C:/laragon/www/mdpashaaa-archive-web/src/pages/about.astro",{"propagation":"none","containsHead":true}],["C:/laragon/www/mdpashaaa-archive-web/src/pages/admin/index.astro",{"propagation":"none","containsHead":true}],["C:/laragon/www/mdpashaaa-archive-web/src/pages/galleries/[item].astro",{"propagation":"none","containsHead":true}],["C:/laragon/www/mdpashaaa-archive-web/src/pages/galleries/index.astro",{"propagation":"none","containsHead":true}],["C:/laragon/www/mdpashaaa-archive-web/src/pages/index.astro",{"propagation":"none","containsHead":true}]],"renderers":[],"clientDirectives":[["idle","(()=>{var l=(n,t)=>{let i=async()=>{await(await n())()},e=typeof t.value==\"object\"?t.value:void 0,s={timeout:e==null?void 0:e.timeout};\"requestIdleCallback\"in window?window.requestIdleCallback(i,s):setTimeout(i,s.timeout||200)};(self.Astro||(self.Astro={})).idle=l;window.dispatchEvent(new Event(\"astro:idle\"));})();"],["load","(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event(\"astro:load\"));})();"],["media","(()=>{var n=(a,t)=>{let i=async()=>{await(await a())()};if(t.value){let e=matchMedia(t.value);e.matches?i():e.addEventListener(\"change\",i,{once:!0})}};(self.Astro||(self.Astro={})).media=n;window.dispatchEvent(new Event(\"astro:media\"));})();"],["only","(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).only=e;window.dispatchEvent(new Event(\"astro:only\"));})();"],["visible","(()=>{var a=(s,i,o)=>{let r=async()=>{await(await s())()},t=typeof i.value==\"object\"?i.value:void 0,c={rootMargin:t==null?void 0:t.rootMargin},n=new IntersectionObserver(e=>{for(let l of e)if(l.isIntersecting){n.disconnect(),r();break}},c);for(let e of o.children)n.observe(e)};(self.Astro||(self.Astro={})).visible=a;window.dispatchEvent(new Event(\"astro:visible\"));})();"]],"entryModules":{"astro/entrypoints/prerender":"prerender-entry.VHR9EXSU.mjs","\u0000virtual:astro:actions/noop-entrypoint":"chunks/noop-entrypoint_BOlrdqWF.mjs","\u0000noop-middleware":"virtual_astro_middleware.mjs","\u0000virtual:astro:session-driver":"chunks/_virtual_astro_session-driver_DYx9Bb3p.mjs","\u0000virtual:astro:server-island-manifest":"chunks/_virtual_astro_server-island-manifest_CQQ1F5PF.mjs","@astrojs/vercel/entrypoint":"entry.mjs","\u0000virtual:astro:page:src/pages/404@_@astro":"chunks/404_rWUgEUsv.mjs","\u0000virtual:astro:page:src/pages/about@_@astro":"chunks/about_NcYC9Q2H.mjs","\u0000virtual:astro:page:src/pages/admin/index@_@astro":"chunks/index_DlsbiC5J.mjs","\u0000virtual:astro:page:src/pages/api/cloudinary/delete@_@js":"chunks/delete_DAj01iNu.mjs","\u0000virtual:astro:page:src/pages/galleries/[item]@_@astro":"chunks/_item__DVtzxD04.mjs","\u0000virtual:astro:page:src/pages/galleries/index@_@astro":"chunks/index_CWAD6YcY.mjs","\u0000virtual:astro:page:src/pages/index@_@astro":"chunks/index_COocxMB1.mjs","C:/laragon/www/mdpashaaa-archive-web/node_modules/astro/dist/assets/services/sharp.js":"chunks/sharp_LVwmUJki.mjs","@astrojs/react/client.js":"_astro/client.DpoKbfDq.js","C:/laragon/www/mdpashaaa-archive-web/src/components/Admin/AdminLogin":"_astro/AdminLogin.D3cnglMd.js","C:/laragon/www/mdpashaaa-archive-web/src/components/Comments/CommentSection.jsx":"_astro/CommentSection.C5ZHMnml.js","C:/laragon/www/mdpashaaa-archive-web/src/components/Gallery/GallerySection.jsx":"_astro/GallerySection.CqLswg7i.js","C:/laragon/www/mdpashaaa-archive-web/src/components/MemoriesMap":"_astro/MemoriesMap.BB3b3u2H.js","C:/laragon/www/mdpashaaa-archive-web/src/components/Navbar.astro?astro&type=script&index=0&lang.ts":"_astro/Navbar.astro_astro_type_script_index_0_lang.D3cVtg32.js","astro:scripts/before-hydration.js":""},"inlinedScripts":[["C:/laragon/www/mdpashaaa-archive-web/src/components/Navbar.astro?astro&type=script&index=0&lang.ts","const e=document.getElementById(\"mobile-menu\"),n=document.getElementById(\"menu-btn\"),l=document.getElementById(\"close-menu\");n?.addEventListener(\"click\",()=>{e?.classList.remove(\"translate-x-full\")});l?.addEventListener(\"click\",()=>{e?.classList.add(\"translate-x-full\")});e?.querySelectorAll(\"a\").forEach(t=>{t.addEventListener(\"click\",()=>{e?.classList.add(\"translate-x-full\")})});"]],"assets":["/botakk.mp4","/favicon.ico","/favicon.svg","/_astro/AdminLogin.D3cnglMd.js","/_astro/client.DpoKbfDq.js","/_astro/CommentSection.C5ZHMnml.js","/_astro/GallerySection.CqLswg7i.js","/_astro/index.B7Re4WHm.js","/_astro/index.Co7GOKBC.js","/_astro/index.CW1Nni_W.js","/_astro/MemoriesMap.BB3b3u2H.js","/_astro/MemoriesMap.CIGW-MKW.css","/_astro/supabase.D8WMohaD.js","/_astro/Footer.De7wnojB.css"],"buildFormat":"directory","checkOrigin":true,"actionBodySizeLimit":1048576,"serverIslandBodySizeLimit":1048576,"allowedDomains":[],"key":"9KvKPiKk5W+1PJ5QMt3DSYkrhzNxDHP3aerxw0r/l/c=","image":{},"devToolbar":{"enabled":false,"debugInfoOutput":""},"logLevel":"info","shouldInjectCspMetaTags":false}));
+const _manifest = deserializeManifest(({"rootDir":"file:///C:/laragon/www/mdpashaaa-archive-web/","cacheDir":"file:///C:/laragon/www/mdpashaaa-archive-web/node_modules/.astro/","outDir":"file:///C:/laragon/www/mdpashaaa-archive-web/dist/","srcDir":"file:///C:/laragon/www/mdpashaaa-archive-web/src/","publicDir":"file:///C:/laragon/www/mdpashaaa-archive-web/public/","buildClientDir":"file:///C:/laragon/www/mdpashaaa-archive-web/dist/client/","buildServerDir":"file:///C:/laragon/www/mdpashaaa-archive-web/dist/server/","adapterName":"@astrojs/vercel","assetsDir":"_astro","routes":[{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"type":"page","component":"_server-islands.astro","params":["name"],"segments":[[{"content":"_server-islands","dynamic":false,"spread":false}],[{"content":"name","dynamic":true,"spread":false}]],"pattern":"^\\/_server-islands\\/([^/]+?)\\/?$","prerender":false,"isIndex":false,"fallbackRoutes":[],"route":"/_server-islands/[name]","origin":"internal","distURL":[],"_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/_image","component":"node_modules/astro/dist/assets/endpoint/generic.js","params":[],"pathname":"/_image","pattern":"^\\/_image\\/?$","segments":[[{"content":"_image","dynamic":false,"spread":false}]],"type":"endpoint","prerender":false,"fallbackRoutes":[],"distURL":[],"isIndex":false,"origin":"internal","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[{"type":"external","src":"_astro/Footer.De7wnojB.css"}],"routeData":{"route":"/404","isIndex":false,"type":"page","pattern":"^\\/404\\/?$","segments":[[{"content":"404","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/404.astro","pathname":"/404","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[{"type":"external","src":"_astro/Footer.De7wnojB.css"}],"routeData":{"route":"/about","isIndex":false,"type":"page","pattern":"^\\/about\\/?$","segments":[[{"content":"about","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/about.astro","pathname":"/about","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[{"type":"external","src":"_astro/Footer.De7wnojB.css"}],"routeData":{"route":"/admin","isIndex":true,"type":"page","pattern":"^\\/admin\\/?$","segments":[[{"content":"admin","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/admin/index.astro","pathname":"/admin","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/api/cloudinary/delete","isIndex":false,"type":"endpoint","pattern":"^\\/api\\/cloudinary\\/delete\\/?$","segments":[[{"content":"api","dynamic":false,"spread":false}],[{"content":"cloudinary","dynamic":false,"spread":false}],[{"content":"delete","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/api/cloudinary/delete.js","pathname":"/api/cloudinary/delete","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[{"type":"external","src":"_astro/Footer.De7wnojB.css"}],"routeData":{"route":"/galleries/[item]","isIndex":false,"type":"page","pattern":"^\\/galleries\\/([^/]+?)\\/?$","segments":[[{"content":"galleries","dynamic":false,"spread":false}],[{"content":"item","dynamic":true,"spread":false}]],"params":["item"],"component":"src/pages/galleries/[item].astro","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[{"type":"external","src":"_astro/Footer.De7wnojB.css"}],"routeData":{"route":"/galleries","isIndex":true,"type":"page","pattern":"^\\/galleries\\/?$","segments":[[{"content":"galleries","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/galleries/index.astro","pathname":"/galleries","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[{"type":"external","src":"_astro/Footer.De7wnojB.css"},{"type":"external","src":"_astro/MemoriesMap.CIGW-MKW.css"}],"routeData":{"route":"/","isIndex":true,"type":"page","pattern":"^\\/$","segments":[],"params":[],"component":"src/pages/index.astro","pathname":"/","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}}],"serverLike":true,"middlewareMode":"classic","base":"/","trailingSlash":"ignore","compressHTML":true,"experimentalQueuedRendering":{"enabled":false,"poolSize":0,"contentCache":false},"componentMetadata":[["C:/laragon/www/mdpashaaa-archive-web/src/pages/404.astro",{"propagation":"none","containsHead":true}],["C:/laragon/www/mdpashaaa-archive-web/src/pages/about.astro",{"propagation":"none","containsHead":true}],["C:/laragon/www/mdpashaaa-archive-web/src/pages/admin/index.astro",{"propagation":"none","containsHead":true}],["C:/laragon/www/mdpashaaa-archive-web/src/pages/galleries/[item].astro",{"propagation":"none","containsHead":true}],["C:/laragon/www/mdpashaaa-archive-web/src/pages/galleries/index.astro",{"propagation":"none","containsHead":true}],["C:/laragon/www/mdpashaaa-archive-web/src/pages/index.astro",{"propagation":"none","containsHead":true}]],"renderers":[],"clientDirectives":[["idle","(()=>{var l=(n,t)=>{let i=async()=>{await(await n())()},e=typeof t.value==\"object\"?t.value:void 0,s={timeout:e==null?void 0:e.timeout};\"requestIdleCallback\"in window?window.requestIdleCallback(i,s):setTimeout(i,s.timeout||200)};(self.Astro||(self.Astro={})).idle=l;window.dispatchEvent(new Event(\"astro:idle\"));})();"],["load","(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event(\"astro:load\"));})();"],["media","(()=>{var n=(a,t)=>{let i=async()=>{await(await a())()};if(t.value){let e=matchMedia(t.value);e.matches?i():e.addEventListener(\"change\",i,{once:!0})}};(self.Astro||(self.Astro={})).media=n;window.dispatchEvent(new Event(\"astro:media\"));})();"],["only","(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).only=e;window.dispatchEvent(new Event(\"astro:only\"));})();"],["visible","(()=>{var a=(s,i,o)=>{let r=async()=>{await(await s())()},t=typeof i.value==\"object\"?i.value:void 0,c={rootMargin:t==null?void 0:t.rootMargin},n=new IntersectionObserver(e=>{for(let l of e)if(l.isIntersecting){n.disconnect(),r();break}},c);for(let e of o.children)n.observe(e)};(self.Astro||(self.Astro={})).visible=a;window.dispatchEvent(new Event(\"astro:visible\"));})();"]],"entryModules":{"astro/entrypoints/prerender":"prerender-entry.BMNDw2bc.mjs","\u0000virtual:astro:actions/noop-entrypoint":"chunks/noop-entrypoint_BOlrdqWF.mjs","\u0000noop-middleware":"virtual_astro_middleware.mjs","\u0000virtual:astro:session-driver":"chunks/_virtual_astro_session-driver_DYx9Bb3p.mjs","\u0000virtual:astro:server-island-manifest":"chunks/_virtual_astro_server-island-manifest_CQQ1F5PF.mjs","@astrojs/vercel/entrypoint":"entry.mjs","\u0000virtual:astro:page:src/pages/404@_@astro":"chunks/404_DrPG8m0C.mjs","\u0000virtual:astro:page:src/pages/about@_@astro":"chunks/about_BUoWC15f.mjs","\u0000virtual:astro:page:src/pages/admin/index@_@astro":"chunks/index_Bdc42RV-.mjs","\u0000virtual:astro:page:src/pages/api/cloudinary/delete@_@js":"chunks/delete_DAj01iNu.mjs","\u0000virtual:astro:page:src/pages/galleries/[item]@_@astro":"chunks/_item__BcQh0HOl.mjs","\u0000virtual:astro:page:src/pages/galleries/index@_@astro":"chunks/index_z2jMMX7N.mjs","\u0000virtual:astro:page:src/pages/index@_@astro":"chunks/index_CRZlRtC6.mjs","C:/laragon/www/mdpashaaa-archive-web/node_modules/astro/dist/assets/services/sharp.js":"chunks/sharp_BzCuiHQR.mjs","@astrojs/react/client.js":"_astro/client.Cd3ZxOjd.js","C:/laragon/www/mdpashaaa-archive-web/src/components/Admin/AdminLogin":"_astro/AdminLogin.BcNkqbRP.js","C:/laragon/www/mdpashaaa-archive-web/src/components/Comments/CommentSection.jsx":"_astro/CommentSection.CcvdRp8-.js","C:/laragon/www/mdpashaaa-archive-web/src/components/Gallery/GallerySection.jsx":"_astro/GallerySection.Bgrft778.js","C:/laragon/www/mdpashaaa-archive-web/src/components/MemoriesMap":"_astro/MemoriesMap.D2EBZrvv.js","C:/laragon/www/mdpashaaa-archive-web/src/components/Navbar.astro?astro&type=script&index=0&lang.ts":"_astro/Navbar.astro_astro_type_script_index_0_lang.D3cVtg32.js","astro:scripts/before-hydration.js":""},"inlinedScripts":[["C:/laragon/www/mdpashaaa-archive-web/src/components/Navbar.astro?astro&type=script&index=0&lang.ts","const e=document.getElementById(\"mobile-menu\"),n=document.getElementById(\"menu-btn\"),l=document.getElementById(\"close-menu\");n?.addEventListener(\"click\",()=>{e?.classList.remove(\"translate-x-full\")});l?.addEventListener(\"click\",()=>{e?.classList.add(\"translate-x-full\")});e?.querySelectorAll(\"a\").forEach(t=>{t.addEventListener(\"click\",()=>{e?.classList.add(\"translate-x-full\")})});"]],"assets":["/botakk.mp4","/favicon.ico","/favicon.svg","/_astro/AdminLogin.BcNkqbRP.js","/_astro/client.Cd3ZxOjd.js","/_astro/CommentSection.CcvdRp8-.js","/_astro/GallerySection.Bgrft778.js","/_astro/index.C4H-CXe2.js","/_astro/index.CmLIgCVx.js","/_astro/index.DAW2DOZk.js","/_astro/MemoriesMap.CIGW-MKW.css","/_astro/MemoriesMap.D2EBZrvv.js","/_astro/supabase.B-vMg_pf.js","/_astro/Footer.De7wnojB.css"],"buildFormat":"directory","checkOrigin":true,"actionBodySizeLimit":1048576,"serverIslandBodySizeLimit":1048576,"allowedDomains":[],"key":"pQJpR4yxZJfH/oo+J2AZQGOLkCJIQNJtTWGXytIqebg=","image":{},"devToolbar":{"enabled":false,"debugInfoOutput":""},"logLevel":"info","shouldInjectCspMetaTags":false}));
 					const manifestRoutes = _manifest.routes;
 					
 					const manifest = Object.assign(_manifest, {
@@ -10973,4 +11221,4 @@ var entrypoint_default = {
   }
 };
 
-export { AstroError as A, ExpectedImage as E, FailedToFetchRemoteImageDimensions as F, ImageMissingAlt as I, LocalImageUsedWrongly as L, MissingGetFontFileRequestUrl as M, NoImageMetadata as N, RemoteImageNotAllowed as R, UnsupportedImageConversion as U, ExpectedImageOptions as a, ExpectedNotESMImage as b, FontFamilyNotFound as c, IncompatibleDescriptorOptions as d, InvalidComponentArgs as e, InvalidImageService as f, MissingImageDimension as g, MissingSharp as h, UnsupportedImageFormat as i, addAttribute as j, createRenderInstruction as k, entrypoint_default as l, isRemoteAllowed as m, isRemotePath as n, joinPaths as o, maybeRenderHead as p, renderComponent as q, removeQueryString as r, renderHead as s, renderSlot as t, renderTemplate as u, spreadAttributes as v, typeHandlers as w, types as x, unescapeHTML as y };
+export { AstroError as A, ExpectedImage as E, FailedToFetchRemoteImageDimensions as F, IncompatibleDescriptorOptions as I, LocalImageUsedWrongly as L, MissingImageDimension as M, NoImageMetadata as N, RemoteImageNotAllowed as R, UnsupportedImageFormat as U, types as a, isRemotePath as b, UnsupportedImageConversion as c, InvalidImageService as d, ExpectedImageOptions as e, ExpectedNotESMImage as f, ImageMissingAlt as g, addAttribute as h, isRemoteAllowed as i, joinPaths as j, renderTemplate as k, FontFamilyNotFound as l, maybeRenderHead as m, MissingGetFontFileRequestUrl as n, renderComponent as o, createRenderInstruction as p, renderHead as q, removeQueryString as r, spreadAttributes as s, typeHandlers as t, unescapeHTML as u, renderSlot as v, InvalidComponentArgs as w, MissingSharp as x, entrypoint_default as y };

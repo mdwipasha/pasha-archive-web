@@ -1,8 +1,8 @@
-import { c as createComponent } from './astro-component_CJ15kxtp.mjs';
+import { c as createComponent } from './astro-component_Cm1CKSpY.mjs';
 import 'piccolore';
-import { q as renderComponent, u as renderTemplate, p as maybeRenderHead } from './entrypoint_BVRuuQGF.mjs';
-import { a as $$Layout, $ as $$Footer } from './Footer_DbFiltz2.mjs';
-import { $ as $$Navbar } from './Navbar_DqphNmkf.mjs';
+import { o as renderComponent, k as renderTemplate, m as maybeRenderHead } from './entrypoint_BLBYqHYh.mjs';
+import { $ as $$Layout, a as $$Footer } from './Footer_BQTO-CiJ.mjs';
+import { $ as $$Navbar } from './Navbar_LdvXXN32.mjs';
 
 const $$404 = createComponent(($$result, $$props, $$slots) => {
   return renderTemplate`${renderComponent($$result, "Layout", $$Layout, { "title": "404 - Archive Entry Not Found" }, { "default": ($$result2) => renderTemplate` ${renderComponent($$result2, "Navbar", $$Navbar, {})} ${maybeRenderHead()}<main class="min-h-[calc(100vh-80px)] flex items-center justify-center px-6 py-16"> <div class="max-w-6xl w-full grid md:grid-cols-2 gap-16 items-center"> <!-- POLAROID --> <div class="flex justify-center"> <div class="relative bg-[#faf7f1] neo-card p-4 w-[320px] rotate-[-3deg] polaroid-float"> <div class="tape blue scrapbook-tape"></div> <div class="aspect-[4/5] border-[3px] border-dashed border-black relative overflow-hidden flex items-center justify-center paper-texture"> <div class="text-center z-10"></div> <div class="absolute border-[4px] border-red-600 text-red-600 font-black text-3xl px-4 py-1 rotate-[-12deg]">
