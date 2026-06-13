@@ -370,6 +370,303 @@ function PickFromMemoryModal({ open, onClose, onPick }) {
   );
 }
 
+// ── Pick Date From Memory Modal ───────────────────────────────────────────────
+function PickDateFromMemoryModal({ open, onClose, onPick, excludeId = null }) {
+  const [memories, setMemories] = useState([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const overlayRef = useRef(null);
+  const searchRef = useRef(null);
+
+  function formatDate(d) {
+    if (!d) return "";
+    const [y, m, day] = d.split("-");
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return `${parseInt(day)} ${months[parseInt(m) - 1]} ${y}`;
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    setSearch("");
+    setLoading(true);
+    supabase
+      .from("memories")
+      .select("id, title, date, year, location")
+      .not("date", "is", null)
+      .order("date", { ascending: false })
+      .then(({ data }) => {
+        setMemories(
+          (data || []).filter((m) => excludeId == null || m.id !== excludeId),
+        );
+        setLoading(false);
+      });
+  }, [open, excludeId]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open, onClose]);
+
+  useEffect(() => {
+    if (open) setTimeout(() => searchRef.current?.focus(), 60);
+  }, [open]);
+
+  if (!open) return null;
+
+  const q = search.toLowerCase();
+  const filtered = memories.filter(
+    (m) =>
+      !q ||
+      m.title?.toLowerCase().includes(q) ||
+      m.location?.toLowerCase().includes(q),
+  );
+
+  return (
+    <div
+      ref={overlayRef}
+      onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(28,27,27,0.65)",
+        zIndex: 10000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 16,
+      }}
+    >
+      <div
+        style={{
+          background: C.surface,
+          border: `3px solid ${C.black}`,
+          boxShadow: `10px 10px 0px ${C.black}`,
+          width: "100%",
+          maxWidth: 500,
+          maxHeight: "78vh",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            background: C.black,
+            padding: "13px 18px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span
+              style={{
+                background: C.green,
+                color: C.black,
+                padding: "2px 9px",
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 800,
+                fontSize: 10,
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+              }}
+            >
+              Date
+            </span>
+            <span
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 700,
+                fontSize: 13,
+                color: "#fff",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
+              Copy date from another memory
+            </span>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: "transparent",
+              border: `2px solid #444`,
+              color: "#aaa",
+              width: 28,
+              height: 28,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              fontWeight: 900,
+              fontSize: 14,
+              lineHeight: 1,
+            }}
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Search */}
+        <div
+          style={{
+            padding: "12px 16px",
+            borderBottom: `2px solid ${C.black}`,
+            flexShrink: 0,
+          }}
+        >
+          <input
+            ref={searchRef}
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Filter by title or location…"
+            style={{ ...inputStyle, fontSize: 13 }}
+            onFocus={focusIn}
+            onBlur={focusOut}
+          />
+        </div>
+
+        {/* Results */}
+        <div style={{ flex: 1, overflowY: "auto" }}>
+          {loading ? (
+            <p
+              style={{
+                padding: "24px 18px",
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 13,
+                color: C.textSecondary,
+                fontStyle: "italic",
+                margin: 0,
+              }}
+            >
+              Loading memories with dates…
+            </p>
+          ) : filtered.length === 0 ? (
+            <p
+              style={{
+                padding: "24px 18px",
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 13,
+                color: C.textSecondary,
+                fontStyle: "italic",
+                margin: 0,
+              }}
+            >
+              {search
+                ? "No matches. Try a different title or location."
+                : "No other memories with a recorded date."}
+            </p>
+          ) : (
+            filtered.map((m) => (
+              <button
+                key={m.id}
+                onClick={() => {
+                  onPick({ date: m.date, year: m.year });
+                  onClose();
+                }}
+                style={{
+                  width: "100%",
+                  border: "none",
+                  borderBottom: `1px solid ${C.outlineVariant}`,
+                  background: "transparent",
+                  padding: "11px 16px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 14,
+                  textAlign: "left",
+                  transition: "background 0.1s ease",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = C.surfaceAlt; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+              >
+                {/* Left: title + location */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 700,
+                      fontSize: 13,
+                      color: C.black,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      marginBottom: 2,
+                    }}
+                  >
+                    {m.title}
+                  </div>
+                  {m.location && (
+                    <div
+                      style={{
+                        fontFamily: "'Inter', sans-serif",
+                        fontSize: 11,
+                        color: C.onSurfaceVariant,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      📍 {m.location}
+                    </div>
+                  )}
+                </div>
+
+                {/* Right: formatted date badge */}
+                <div style={{ flexShrink: 0, textAlign: "right" }}>
+                  <div
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: C.black,
+                      background: C.green,
+                      border: `2px solid ${C.black}`,
+                      padding: "3px 10px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {formatDate(m.date)}
+                  </div>
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+
+        {/* Footer count */}
+        {!loading && filtered.length > 0 && (
+          <div
+            style={{
+              padding: "8px 16px",
+              borderTop: `2px solid ${C.black}`,
+              background: C.surfaceAlt,
+              flexShrink: 0,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 11,
+                color: C.onSurfaceVariant,
+                fontWeight: 600,
+              }}
+            >
+              {filtered.length}{" "}
+              {filtered.length === 1 ? "memory" : "memories"} with a date
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Manage Modal ───────────────────────────────────────────────────────────────
 
 function ManageModal({
@@ -781,6 +1078,7 @@ export default function MemoryForm({ onSaved }) {
   const [manageOpen, setManageOpen] = useState(false);
   const [locationPickerOpen, setLocationPickerOpen] = useState(false);
   const [pickMemoryOpen, setPickMemoryOpen] = useState(false);
+  const [pickDateOpen, setPickDateOpen] = useState(false);
 
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -849,6 +1147,12 @@ export default function MemoryForm({ onSaved }) {
     // Auto-fill location text only when the field is currently empty
     if (memLoc && !location.trim()) setLocation(memLoc);
     showToast("Coordinates copied from memory ✓");
+  }
+
+  // ── Pick date from memory handler ─────────────────────────────────────────
+  function handlePickDateFromMemory({ date: memDate }) {
+    setDate(memDate);
+    showToast("Date copied from memory ✓");
   }
 
   async function handleSubmit(e) {
@@ -995,6 +1299,13 @@ export default function MemoryForm({ onSaved }) {
         onPick={handlePickFromMemory}
       />
 
+      {/* Pick Date From Memory Modal */}
+      <PickDateFromMemoryModal
+        open={pickDateOpen}
+        onClose={() => setPickDateOpen(false)}
+        onPick={handlePickDateFromMemory}
+      />
+
       <form onSubmit={handleSubmit}>
         {/* Row 1: Title + Date */}
         <div
@@ -1023,6 +1334,32 @@ export default function MemoryForm({ onSaved }) {
               onFocus={focusIn}
               onBlur={focusOut}
             />
+            <button
+              type="button"
+              onClick={() => setPickDateOpen(true)}
+              style={{
+                marginTop: 6,
+                border: `2px solid ${C.black}`,
+                background: date ? C.green : C.surfaceAlt,
+                color: C.black,
+                padding: "5px 12px",
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 700,
+                fontSize: 11,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                cursor: "pointer",
+                boxShadow: `2px 2px 0px ${C.black}`,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+                transition: "all 0.12s ease",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = "translate(2px,2px)"; e.currentTarget.style.boxShadow = "none"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = `2px 2px 0px ${C.black}`; }}
+            >
+              📅 From Memory
+            </button>
           </div>
         </div>
 
