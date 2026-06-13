@@ -59,6 +59,317 @@ const focusOut = (e) => {
   e.target.style.transform = "none";
 };
 
+// ── Pick From Memory Modal ────────────────────────────────────────────────────
+function PickFromMemoryModal({ open, onClose, onPick }) {
+  const [memories, setMemories] = useState([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const overlayRef = useRef(null);
+  const searchRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setSearch("");
+    setLoading(true);
+    supabase
+      .from("memories")
+      .select("id, title, location, latitude, longitude, year")
+      .not("latitude", "is", null)
+      .not("longitude", "is", null)
+      .order("year", { ascending: false })
+      .then(({ data }) => {
+        setMemories(data || []);
+        setLoading(false);
+      });
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open, onClose]);
+
+  useEffect(() => {
+    if (open) setTimeout(() => searchRef.current?.focus(), 60);
+  }, [open]);
+
+  if (!open) return null;
+
+  const q = search.toLowerCase();
+  const filtered = memories.filter(
+    (m) =>
+      !q ||
+      m.title?.toLowerCase().includes(q) ||
+      m.location?.toLowerCase().includes(q),
+  );
+
+  return (
+    <div
+      ref={overlayRef}
+      onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(28,27,27,0.65)",
+        zIndex: 10000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 16,
+      }}
+    >
+      <div
+        style={{
+          background: C.surface,
+          border: `3px solid ${C.black}`,
+          boxShadow: `10px 10px 0px ${C.black}`,
+          width: "100%",
+          maxWidth: 500,
+          maxHeight: "78vh",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            background: C.black,
+            padding: "13px 18px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span
+              style={{
+                background: C.pink,
+                color: C.black,
+                padding: "2px 9px",
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 800,
+                fontSize: 10,
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+              }}
+            >
+              Coords
+            </span>
+            <span
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 700,
+                fontSize: 13,
+                color: "#fff",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
+              Copy from another memory
+            </span>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: "transparent",
+              border: `2px solid #444`,
+              color: "#aaa",
+              width: 28,
+              height: 28,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              fontWeight: 900,
+              fontSize: 14,
+              lineHeight: 1,
+            }}
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Search bar */}
+        <div
+          style={{
+            padding: "12px 16px",
+            borderBottom: `2px solid ${C.black}`,
+            flexShrink: 0,
+          }}
+        >
+          <input
+            ref={searchRef}
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Filter by title or location…"
+            style={{ ...inputStyle, fontSize: 13 }}
+            onFocus={focusIn}
+            onBlur={focusOut}
+          />
+        </div>
+
+        {/* Results list */}
+        <div style={{ flex: 1, overflowY: "auto" }}>
+          {loading ? (
+            <p
+              style={{
+                padding: "24px 18px",
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 13,
+                color: C.textSecondary,
+                fontStyle: "italic",
+                margin: 0,
+              }}
+            >
+              Loading memories with coordinates…
+            </p>
+          ) : filtered.length === 0 ? (
+            <p
+              style={{
+                padding: "24px 18px",
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 13,
+                color: C.textSecondary,
+                fontStyle: "italic",
+                margin: 0,
+              }}
+            >
+              {search
+                ? "No matches. Try a different title or location."
+                : "No memories with pinned coordinates yet."}
+            </p>
+          ) : (
+            filtered.map((m) => (
+              <button
+                key={m.id}
+                onClick={() => {
+                  onPick({
+                    lat: m.latitude,
+                    lng: m.longitude,
+                    location: m.location,
+                  });
+                  onClose();
+                }}
+                style={{
+                  width: "100%",
+                  border: "none",
+                  borderBottom: `1px solid ${C.outlineVariant}`,
+                  background: "transparent",
+                  padding: "11px 16px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 14,
+                  textAlign: "left",
+                  transition: "background 0.1s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = C.surfaceAlt;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                }}
+              >
+                {/* Left: title + location */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 700,
+                      fontSize: 13,
+                      color: C.black,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      marginBottom: 2,
+                    }}
+                  >
+                    {m.title}
+                  </div>
+                  {m.location && (
+                    <div
+                      style={{
+                        fontFamily: "'Inter', sans-serif",
+                        fontSize: 11,
+                        color: C.onSurfaceVariant,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      📍 {m.location}
+                    </div>
+                  )}
+                </div>
+
+                {/* Right: coords + year */}
+                <div style={{ flexShrink: 0, textAlign: "right" }}>
+                  <div
+                    style={{
+                      fontFamily: "monospace",
+                      fontSize: 11,
+                      color: C.outline,
+                      background: C.surfaceAlt,
+                      border: `1px solid ${C.outlineVariant}`,
+                      padding: "2px 7px",
+                      marginBottom: 3,
+                    }}
+                  >
+                    {Number(m.latitude).toFixed(4)},{" "}
+                    {Number(m.longitude).toFixed(4)}
+                  </div>
+                  {m.year && (
+                    <div
+                      style={{
+                        fontFamily: "'Inter', sans-serif",
+                        fontSize: 10,
+                        color: C.textSecondary,
+                        fontWeight: 600,
+                        textAlign: "right",
+                      }}
+                    >
+                      {m.year}
+                    </div>
+                  )}
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+
+        {/* Footer count */}
+        {!loading && filtered.length > 0 && (
+          <div
+            style={{
+              padding: "8px 16px",
+              borderTop: `2px solid ${C.black}`,
+              background: C.surfaceAlt,
+              flexShrink: 0,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 11,
+                color: C.onSurfaceVariant,
+                fontWeight: 600,
+              }}
+            >
+              {filtered.length}{" "}
+              {filtered.length === 1 ? "memory" : "memories"} with pinned
+              coords
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Manage Modal ───────────────────────────────────────────────────────────────
 
 function ManageModal({
@@ -469,6 +780,7 @@ export default function MemoryForm({ onSaved }) {
 
   const [manageOpen, setManageOpen] = useState(false);
   const [locationPickerOpen, setLocationPickerOpen] = useState(false);
+  const [pickMemoryOpen, setPickMemoryOpen] = useState(false);
 
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -528,6 +840,15 @@ export default function MemoryForm({ onSaved }) {
     if (f && (f.type.startsWith("image/") || f.type.startsWith("video/"))) {
       handleFileChange(f);
     }
+  }
+
+  // ── Pick-from-memory handler ───────────────────────────────────────────────
+  function handlePickFromMemory({ lat, lng, location: memLoc }) {
+    setLatitude(String(lat));
+    setLongitude(String(lng));
+    // Auto-fill location text only when the field is currently empty
+    if (memLoc && !location.trim()) setLocation(memLoc);
+    showToast("Coordinates copied from memory ✓");
   }
 
   async function handleSubmit(e) {
@@ -667,6 +988,13 @@ export default function MemoryForm({ onSaved }) {
         />
       )}
 
+      {/* Pick From Memory Modal */}
+      <PickFromMemoryModal
+        open={pickMemoryOpen}
+        onClose={() => setPickMemoryOpen(false)}
+        onPick={handlePickFromMemory}
+      />
+
       <form onSubmit={handleSubmit}>
         {/* Row 1: Title + Date */}
         <div
@@ -791,8 +1119,9 @@ export default function MemoryForm({ onSaved }) {
             </div>
           </div>
 
-          {/* Map picker row */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* Map picker row — now with three buttons */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            {/* Pick on map */}
             <button
               type="button"
               onClick={() => setLocationPickerOpen(true)}
@@ -818,6 +1147,34 @@ export default function MemoryForm({ onSaved }) {
               onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = `3px 3px 0px ${C.black}`; }}
             >
                {hasCoords ? "Edit on Map" : "Pick on Map"}
+            </button>
+
+            {/* NEW: Pick from another memory */}
+            <button
+              type="button"
+              onClick={() => setPickMemoryOpen(true)}
+              style={{
+                border: `2px solid ${C.black}`,
+                background: C.pink,
+                color: C.black,
+                padding: "8px 18px",
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 700,
+                fontSize: 12,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                cursor: "pointer",
+                boxShadow: `3px 3px 0px ${C.black}`,
+                display: "flex",
+                alignItems: "center",
+                gap: 7,
+                transition: "all 0.12s ease",
+                flexShrink: 0,
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = "translate(2px,2px)"; e.currentTarget.style.boxShadow = "none"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = `3px 3px 0px ${C.black}`; }}
+            >
+              📍 From Memory
             </button>
 
             {hasCoords && (
