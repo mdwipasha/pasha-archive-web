@@ -9,6 +9,24 @@ export default function CommentSection(props) {
   const [comments, setComments] = useState(initialComments);
   const [showAllComments, setShowAllComments] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
+  const [visitorId, setVisitorId] = useState(null);
+
+  function generateVisitorId() {
+    if (typeof crypto !== "undefined" && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+
+  // Load visitor ID from localStorage on mount
+  useEffect(() => {
+    let id = localStorage.getItem("visitor-id");
+    if (!id) {
+      id = generateVisitorId();
+      localStorage.setItem("visitor-id", id);
+    }
+    setVisitorId(id);
+  }, []);
 
   // Fetch fresh comments from Supabase on mount so that
   // production pages (static HTML) always show the latest data.
@@ -16,7 +34,7 @@ export default function CommentSection(props) {
     async function fetchComments() {
       const { data, error } = await supabase
         .from("memory_comments")
-        .select("id, memory_id, username, comment, created_at, parent_id")
+        .select("id, memory_id, username, comment, created_at, parent_id, visitor_id, is_anonymous, deleted_at")
         .eq("memory_id", memoryId)
         .order("created_at", { ascending: false });
 
@@ -36,6 +54,10 @@ export default function CommentSection(props) {
     setComments((prev) => [newComment, ...prev]);
   }
 
+  function handleCommentDeleted(commentId) {
+    setComments((prev) => prev.filter((c) => c.id !== commentId));
+  }
+
   const displayedComments = showAllComments
     ? parentComments
     : parentComments.slice(0, 3);
@@ -44,7 +66,7 @@ export default function CommentSection(props) {
     <div className="space-y-12">
       {/* FORM */}
 
-      <CommentForm memoryId={memoryId} onCommentAdded={handleCommentAdded} />
+      <CommentForm memoryId={memoryId} visitorId={visitorId} onCommentAdded={handleCommentAdded} />
 
       {/* COMMENTS */}
       {replyingTo && (
@@ -74,6 +96,7 @@ export default function CommentSection(props) {
           <CommentForm
             memoryId={memoryId}
             parentId={replyingTo.id}
+            visitorId={visitorId}
             onCommentAdded={(newComment) => {
               handleCommentAdded(newComment);
 
@@ -138,10 +161,12 @@ export default function CommentSection(props) {
                   key={comment.id}
                   comment={comment}
                   index={index}
+                  visitorId={visitorId}
                   replies={comments.filter(
                     (reply) => reply.parent_id === comment.id,
                   )}
                   onReply={setReplyingTo}
+                  onDelete={handleCommentDeleted}
                 />
               ))}
               {parentComments.length > 3 && !showAllComments && (

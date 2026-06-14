@@ -1,21 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 import CommentToast from "./CommentToast";
 
 export default function CommentForm({
   memoryId,
+  visitorId,
   onCommentAdded,
   parentId = null,
 }) {
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(false);
+
+  // Visitor Name locking states
+  const [registeredName, setRegisteredName] = useState("");
+  const [isRegistered, setIsRegistered] = useState(false);
 
   const [toast, setToast] = useState({
     show: false,
     success: true,
     message: "",
   });
+
+  // Fetch locked device name if it exists
+  useEffect(() => {
+    if (!visitorId) return;
+
+    async function checkVisitor() {
+      const { data, error } = await supabase
+        .from("comment_visitors")
+        .select("name")
+        .eq("visitor_id", visitorId)
+        .maybeSingle();
+
+      if (!error && data) {
+        setRegisteredName(data.name);
+        setName(data.name);
+        setIsRegistered(true);
+      }
+    }
+
+    checkVisitor();
+  }, [visitorId]);
 
   function showToast(message, success = true) {
     setToast({
@@ -33,12 +60,44 @@ export default function CommentForm({
   }
 
   async function handleSubmit() {
-    const username = name.trim() || "Anonymous";
     const body = comment.trim();
 
     if (!body) {
       showToast("Please write a comment before posting.", false);
       return;
+    }
+
+    let finalName = "Anonymous";
+
+    if (!isAnonymous) {
+      if (isRegistered) {
+        finalName = registeredName;
+      } else {
+        const trimmedName = name.trim();
+        if (!trimmedName) {
+          showToast("Please enter a name or choose 'Comment as Anonymous'.", false);
+          return;
+        }
+
+        // Lock name to device in comment_visitors table first
+        try {
+          setLoading(true);
+          const { error: regError } = await supabase
+            .from("comment_visitors")
+            .insert({ visitor_id: visitorId, name: trimmedName });
+
+          if (regError) throw regError;
+
+          setRegisteredName(trimmedName);
+          setIsRegistered(true);
+          finalName = trimmedName;
+        } catch (regErr) {
+          console.error("Failed to register name:", regErr);
+          showToast("Unable to lock username to device: " + (regErr.message || "Error"), false);
+          setLoading(false);
+          return;
+        }
+      }
     }
 
     try {
@@ -48,9 +107,11 @@ export default function CommentForm({
         .from("memory_comments")
         .insert({
           memory_id: memoryId,
-          username,
+          username: finalName,
           comment: body,
           parent_id: parentId,
+          visitor_id: visitorId,
+          is_anonymous: isAnonymous,
         })
         .select()
         .single();
@@ -58,14 +119,10 @@ export default function CommentForm({
       if (error) throw error;
 
       onCommentAdded?.(data);
-
-      setName("");
       setComment("");
-
       showToast("Comment posted!", true);
     } catch (error) {
       console.error(error);
-
       showToast(error?.message || "Unable to post comment.", false);
     } finally {
       setLoading(false);
@@ -110,40 +167,86 @@ export default function CommentForm({
             shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]
           "
         >
-          <label
-            className="
-              block
-              text-sm
-              uppercase
-              tracking-[0.2em]
-              font-semibold
-              mb-1
-            "
-          >
-            Name
-          </label>
+          {/* Identity Section */}
+          <div className="mb-4">
+            <p
+              className="
+                    block
+                    text-sm
+                    uppercase
+                    tracking-[0.2em]
+                    font-semibold
+                    mb-1
+                  "
+            >
+              Name *
+            </p>
+            {isAnonymous ? (
+              <div className="mb-5 p-3 border-2 border-dashed border-gray-400 bg-gray-50 text-gray-500 font-semibold text-xs uppercase tracking-wider">
+                Comment as Anonymous (your name will not be shown)
+              </div>
+            ) : isRegistered ? (
+              <div className="mb-5 p-3 border-2 border-black bg-[#DBE9FF] text-black font-bold text-xs uppercase tracking-wider shadow-[2px_2px_0px_#000]">
+                Comment as: <span className="underline">{registeredName}</span>
+              </div>
+            ) : (
+              <>
+                <input
+                  type="text"
+                  maxLength={60}
+                  autoComplete="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your name"
+                  className="
+                    w-full
+                    h-10
+                    px-4
+                    bg-transparent
+                    border-2
+                    border-black
+                    outline-none
+                    transition-all
+                    mb-4
+                    focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
+                  "
+                />
+              </>
+            )}
+          </div>
 
-          <input
-            type="text"
-            maxLength={60}
-            autoComplete="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Your name (optional)"
-            className="
-              w-full
-              h-10
-              px-4
-              bg-transparent
-              border-2
-              border-black
-              outline-none
-              transition-all
-              mb-5
-              focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
-            "
-          />
+          {/* Anonymous Option */}
+          <div className="flex items-center gap-2 mb-5">
+            <input
+              type="checkbox"
+              id={`anon-check-${parentId || "main"}`}
+              checked={isAnonymous}
+              onChange={(e) => setIsAnonymous(e.target.checked)}
+              className="
+                w-5
+                h-5
+                accent-black
+                border-2
+                border-black
+                cursor-pointer
+              "
+            />
+            <label
+              htmlFor={`anon-check-${parentId || "main"}`}
+              className="
+                text-xs
+                font-black
+                uppercase
+                tracking-wider
+                cursor-pointer
+                select-none
+              "
+            >
+              Comment as Anonymous
+            </label>
+          </div>
 
+          {/* Comment input */}
           <label
             className="
               block
