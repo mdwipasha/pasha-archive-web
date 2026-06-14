@@ -2,6 +2,7 @@ import { useState } from "react";
 import { supabase } from "../../lib/supabase";
 import MemoryForm from "./MemoryForm";
 import MemoryTable from "./MemoryTable";
+import MemoryRequestsPanel from "./MemoryRequestsPanel";
 
 export default function AdminDashboard({ user }) {
   const [activeTab, setActiveTab] = useState("collection");
@@ -19,6 +20,7 @@ export default function AdminDashboard({ user }) {
   const tabs = [
     { key: "collection", label: "Collection", icon: "◈" },
     { key: "add", label: "Add Memory", icon: "＋" },
+    { key: "requests", label: "Requests", icon: "📥" },
   ];
 
   return (
@@ -368,6 +370,62 @@ export default function AdminDashboard({ user }) {
               }}
             >
               <MemoryTable refreshKey={refreshKey} />
+            </div>
+          </div>
+        )}
+
+        {/* ── REQUESTS TAB ── */}
+        {activeTab === "requests" && (
+          <div>
+            {/* Section Header */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: 16,
+                marginBottom: 28,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                <div
+                  style={{
+                    border: "3px solid #1c1b1b",
+                    background: "#1c1b1b",
+                    padding: "8px 20px",
+                    boxShadow: "5px 5px 0px #FED74C",
+                    transform: "rotate(-0.5deg)",
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontWeight: 700,
+                      fontSize: 24,
+                      margin: 0,
+                      color: "#FFFDF8",
+                      textTransform: "uppercase",
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    Requests
+                  </h2>
+                </div>
+                <div style={{ flex: 1, height: 3, background: "#1c1b1b", minWidth: 40 }} />
+              </div>
+            </div>
+
+            {/* Table Card */}
+            <div
+              style={{
+                border: "3px solid #1c1b1b",
+                background: "#FFFDF8",
+                padding: "24px",
+                boxShadow: "8px 8px 0px #1c1b1b",
+              }}
+            >
+              <MemoryRequestsPanel />
             </div>
           </div>
         )}

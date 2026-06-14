@@ -499,7 +499,7 @@ function PickDateFromMemoryModal({ open, onClose, onPick, excludeId = null }) {
   function formatDate(d) {
     if (!d) return "";
     const [y, m, day] = d.split("-");
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     return `${parseInt(day)} ${months[parseInt(m) - 1]} ${y}`;
   }
 
@@ -1018,9 +1018,8 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
         updateData.type = result.resource_type === "video" ? "Video" : "Photo";
 
         if (result.resource_type === "video") {
-          updateData.thumbnail_url = `https://res.cloudinary.com/${
-            import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME
-          }/video/upload/so_1/${result.public_id}.jpg`;
+          updateData.thumbnail_url = `https://res.cloudinary.com/${import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME
+            }/video/upload/so_1/${result.public_id}.jpg`;
         }
       } catch (err) {
         showToast(err.message, "error");
@@ -1760,7 +1759,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
                   e.currentTarget.style.boxShadow = `2px 2px 0px ${C.black}`;
                 }}
               >
-                 {hasCoords ? "Edit on Map" : "Pick on Map"}
+                {hasCoords ? "Edit on Map" : "Pick on Map"}
               </button>
 
               {/* NEW: Copy from another memory */}
