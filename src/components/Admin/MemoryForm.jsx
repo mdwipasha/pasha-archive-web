@@ -381,7 +381,7 @@ function PickDateFromMemoryModal({ open, onClose, onPick, excludeId = null }) {
   function formatDate(d) {
     if (!d) return "";
     const [y, m, day] = d.split("-");
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     return `${parseInt(day)} ${months[parseInt(m) - 1]} ${y}`;
   }
 
@@ -685,12 +685,17 @@ function ManageModal({
   const [error, setError] = useState(null);
   const overlayRef = useRef(null);
 
+  // ── Inline edit state ───────────────────────────────────────────────────────
+  const [editingPersonId, setEditingPersonId] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [editSocial, setEditSocial] = useState("");
+
   useEffect(() => {
     if (!open) return;
-    const handler = (e) => { if (e.key === "Escape") onClose(); };
+    const handler = (e) => { if (e.key === "Escape") { if (editingPersonId) { cancelEdit(); } else { onClose(); } } };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [open, onClose]);
+  }, [open, onClose, editingPersonId]);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -698,6 +703,32 @@ function ManageModal({
   }, [open]);
 
   if (!open) return null;
+
+  function startEdit(p) {
+    setEditingPersonId(p.id);
+    setEditName(p.name);
+    setEditSocial(p.social_media || "");
+    setError(null);
+  }
+  function cancelEdit() {
+    setEditingPersonId(null);
+    setEditName("");
+    setEditSocial("");
+  }
+  async function saveEdit() {
+    const name = editName.trim();
+    if (!name) { setError("Name cannot be empty"); return; }
+    setBusy(true);
+    setError(null);
+    const { error: err } = await supabase
+      .from("people")
+      .update({ name, social_media: editSocial.trim() || null })
+      .eq("id", editingPersonId);
+    if (err) { setError(err.message); setBusy(false); return; }
+    cancelEdit();
+    await onPeopleChange();
+    setBusy(false);
+  }
 
   async function addPerson() {
     const name = newPerson.trim();
@@ -904,48 +935,145 @@ function ManageModal({
                 </p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  {people.map((p) => (
-                    <div
-                      key={p.id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        border: `2px solid ${C.black}`,
-                        background: C.surfaceAlt,
-                        padding: "8px 12px",
-                      }}
-                    >
-                      <div>
-                        <span style={{ fontWeight: 700, fontSize: 13 }}>{p.name}</span>
-                        {p.social_media && (
-                          <a
-                            href={p.social_media}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ marginLeft: 10, fontSize: 11, color: C.outline, textDecoration: "underline" }}
-                          >
-                            {p.social_media.replace(/https?:\/\/(www\.)?/, "")}
-                          </a>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => deletePerson(p.id, p.name)}
+                  {people.map((p) =>
+                    editingPersonId === p.id ? (
+                      /* ── Edit row ─────────────────────────────────────────── */
+                      <div
+                        key={p.id}
                         style={{
                           border: `2px solid ${C.black}`,
-                          background: C.error,
-                          color: C.errorText,
-                          padding: "3px 9px",
-                          fontWeight: 900,
-                          fontSize: 13,
-                          cursor: "pointer",
-                          lineHeight: 1.4,
+                          background: C.surface,
+                          padding: "8px 10px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          boxShadow: `3px 3px 0px ${C.blue}`,
                         }}
                       >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, flex: 1 }}>
+                          <input
+                            autoFocus
+                            type="text"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); saveEdit(); } if (e.key === "Escape") cancelEdit(); }}
+                            placeholder="Name"
+                            style={{ ...inputStyle, fontSize: 12, padding: "6px 10px" }}
+                            onFocus={focusIn}
+                            onBlur={focusOut}
+                          />
+                          <input
+                            type="text"
+                            value={editSocial}
+                            onChange={(e) => setEditSocial(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); saveEdit(); } if (e.key === "Escape") cancelEdit(); }}
+                            placeholder="Social link (optional)"
+                            style={{ ...inputStyle, fontSize: 12, padding: "6px 10px" }}
+                            onFocus={focusIn}
+                            onBlur={focusOut}
+                          />
+                        </div>
+                        <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
+                          <button
+                            onClick={saveEdit}
+                            disabled={busy}
+                            style={{
+                              border: `2px solid ${C.black}`,
+                              background: C.green,
+                              color: C.black,
+                              padding: "4px 10px",
+                              fontWeight: 900,
+                              fontSize: 13,
+                              cursor: busy ? "not-allowed" : "pointer",
+                              lineHeight: 1.4,
+                              opacity: busy ? 0.6 : 1,
+                            }}
+                            title="Save"
+                          >
+                            ✓
+                          </button>
+                          <button
+                            onClick={cancelEdit}
+                            style={{
+                              border: `2px solid ${C.black}`,
+                              background: C.surfaceAlt,
+                              color: C.black,
+                              padding: "4px 10px",
+                              fontWeight: 900,
+                              fontSize: 13,
+                              cursor: "pointer",
+                              lineHeight: 1.4,
+                            }}
+                            title="Cancel"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* ── View row ─────────────────────────────────────────── */
+                      <div
+                        key={p.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          border: `2px solid ${C.black}`,
+                          background: C.surfaceAlt,
+                          padding: "8px 12px",
+                        }}
+                      >
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <span style={{ fontWeight: 700, fontSize: 13 }}>{p.name}</span>
+                          {p.social_media && (
+                            <a
+                              href={p.social_media}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ marginLeft: 10, fontSize: 11, color: C.outline, textDecoration: "underline" }}
+                            >
+                              {p.social_media.replace(/https?:\/\/(www\.)?/, "")}
+                            </a>
+                          )}
+                        </div>
+                        <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                          <button
+                            onClick={() => startEdit(p)}
+                            disabled={busy}
+                            style={{
+                              border: `2px solid ${C.black}`,
+                              background: C.blue,
+                              color: C.black,
+                              padding: "3px 9px",
+                              fontWeight: 700,
+                              fontSize: 12,
+                              cursor: "pointer",
+                              lineHeight: 1.4,
+                            }}
+                            title="Edit"
+                          >
+                            ✏
+                          </button>
+                          <button
+                            onClick={() => deletePerson(p.id, p.name)}
+                            disabled={busy}
+                            style={{
+                              border: `2px solid ${C.black}`,
+                              background: C.error,
+                              color: C.errorText,
+                              padding: "3px 9px",
+                              fontWeight: 900,
+                              fontSize: 13,
+                              cursor: "pointer",
+                              lineHeight: 1.4,
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  )}
                 </div>
               )}
             </div>
@@ -1483,7 +1611,7 @@ export default function MemoryForm({ onSaved }) {
               onMouseEnter={(e) => { e.currentTarget.style.transform = "translate(2px,2px)"; e.currentTarget.style.boxShadow = "none"; }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = `3px 3px 0px ${C.black}`; }}
             >
-               {hasCoords ? "Edit on Map" : "Pick on Map"}
+              {hasCoords ? "Edit on Map" : "Pick on Map"}
             </button>
 
             {/* NEW: Pick from another memory */}
@@ -1691,7 +1819,7 @@ export default function MemoryForm({ onSaved }) {
 
         {/* Image Drop Zone */}
         <div style={{ marginBottom: 24 }}>
-          <label style={labelStyle}>Image *</label>
+          <label style={labelStyle}>Image / Video *</label>
           <div
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
