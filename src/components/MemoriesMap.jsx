@@ -7,7 +7,12 @@ import {
   useMap,
   useMapEvents,
 } from "react-leaflet";
-import { useState, useEffect, useRef, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+} from "react";
 import { supabase } from "../lib/supabase";
 
 /* ─── Config ─── */
