@@ -24,10 +24,6 @@
 			"dest": "_render"
 		},
 		{
-			"src": "^/about/?$",
-			"dest": "_render"
-		},
-		{
 			"src": "^/admin/?$",
 			"dest": "_render"
 		},
