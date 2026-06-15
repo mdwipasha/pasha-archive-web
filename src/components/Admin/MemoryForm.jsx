@@ -1252,18 +1252,32 @@ export default function MemoryForm({ onSaved }) {
     setTimeout(() => setToast(null), 3500);
   }
 
+  function isHeif(f) {
+    if (!f) return false;
+    const ext = f.name.split(".").pop().toLowerCase();
+    return ["heif", "heic"].includes(ext);
+  }
+
   function handleFileChange(f) {
     if (!f) return;
+    const heif = isHeif(f);
+    const validMime = f.type.startsWith("image/") || f.type.startsWith("video/");
+    if (!validMime && !heif) {
+      showToast("Please select an image or video file.", "error");
+      return;
+    }
     setFile(f);
-    setPreview(URL.createObjectURL(f));
-    setType(f.type.startsWith("video/") ? "Video" : "Photo");
+    // HEIF can't be previewed in the browser — show a placeholder instead
+    setPreview(heif ? null : URL.createObjectURL(f));
+    setType("Photo");
   }
 
   function handleDrop(e) {
     e.preventDefault();
     setDragOver(false);
     const f = e.dataTransfer.files[0];
-    if (f && (f.type.startsWith("image/") || f.type.startsWith("video/"))) {
+    const heif = isHeif(f);
+    if (f && (f.type.startsWith("image/") || f.type.startsWith("video/") || heif)) {
       handleFileChange(f);
     }
   }

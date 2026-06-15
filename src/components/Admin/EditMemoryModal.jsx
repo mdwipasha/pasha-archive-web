@@ -942,22 +942,35 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
     setAddingTag(false);
   }
 
-  // ── File handling ─────────────────────────────────────────────────────────
+  // Shared helper — add above handleFileChange in each component
+  function isHeif(f) {
+    if (!f) return false;
+    const ext = f.name.split(".").pop().toLowerCase();
+    return ["heif", "heic"].includes(ext);
+  }
+
   function handleFileChange(f) {
     if (!f) return;
-    if (f.type.startsWith("image/") || f.type.startsWith("video/")) {
-      setFile(f);
-      setPreview(URL.createObjectURL(f));
-      setType(f.type.startsWith("video/") ? "Video" : "Photo");
-    } else {
+    const heif = isHeif(f);
+    const validMime = f.type.startsWith("image/") || f.type.startsWith("video/");
+    if (!validMime && !heif) {
       showToast("Please select an image or video file.", "error");
+      return;
     }
+    setFile(f);
+    // HEIF can't be previewed in the browser — show a placeholder instead
+    setPreview(heif ? null : URL.createObjectURL(f));
+    setType("Photo");
   }
 
   function handleDrop(e) {
     e.preventDefault();
     setDragOver(false);
-    handleFileChange(e.dataTransfer.files[0]);
+    const f = e.dataTransfer.files[0];
+    const heif = isHeif(f);
+    if (f && (f.type.startsWith("image/") || f.type.startsWith("video/") || heif)) {
+      handleFileChange(f);
+    }
   }
 
   // ── Pick-from-memory handler ──────────────────────────────────────────────

@@ -230,7 +230,7 @@ export default function VideoModal({ memory, onClose }) {
             controls
             autoPlay
             playsInline
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-contain"
           />
 
           <div
@@ -278,9 +278,8 @@ export default function VideoModal({ memory, onClose }) {
                 "
               >
                 <span
-                  className={`material-symbols-outlined ${
-                    liked ? "text-red-500 filled" : ""
-                  }`}
+                  className={`material-symbols-outlined ${liked ? "text-red-500 filled" : ""
+                    }`}
                 >
                   favorite
                 </span>
@@ -332,9 +331,8 @@ export default function VideoModal({ memory, onClose }) {
             <h2 className="font-black text-lg leading-tight mb-1">mdpashaaa</h2>
 
             <p
-              className={`text-xs leading-relaxed ${
-                expanded ? "" : "line-clamp-2"
-              }`}
+              className={`text-xs leading-relaxed ${expanded ? "" : "line-clamp-2"
+                }`}
             >
               {memory.description}
             </p>

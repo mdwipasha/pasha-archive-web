@@ -792,8 +792,8 @@ export default function MemoriesMap() {
       style={{ fontFamily: "'Space Grotesk', sans-serif" }}
       className="space-y-5 px-6 md:px-16 py-16 md:py-24"
     >
-      <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-5 border-b-2 border-black pb-4">
-        <h2 class="text-4xl md:text-5xl font-black uppercase tracking-[-0.03em]">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-5 border-b-2 border-black pb-4">
+        <h2 className="text-4xl md:text-5xl font-black uppercase tracking-[-0.03em]">
           Map Memories
         </h2>
         {/* City stat pills */}
