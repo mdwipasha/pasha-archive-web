@@ -305,7 +305,7 @@ Possible causes:
 
 ## Created By
 
-**Pasha [(Capa)](https://instagram.com/mdpashaaa)**
+**Muhamad Dwi Pasha [(Capa)](https://instagram.com/mdpashaaa)**
 
 <div align="center">
 
