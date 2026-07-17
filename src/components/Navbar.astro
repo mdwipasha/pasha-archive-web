@@ -1,6 +1,7 @@
 ---
 const navItems = [
   { name: "Home", href: "/#home" },
+  { name: "About", href: "/about" },
   { name: "Gallery", href: "/galleries" },
   { name: "Submit Memory", href: "/submit-memory" },
 ];
@@ -9,8 +10,15 @@ const navItems = [
 <header
   class="sticky top-0 w-full border-b-2 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] bg-[#F3EFE6] z-100"
 >
-  <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-    <a href="/" class="text-2xl font-black uppercase tracking-tighter">
+  <nav
+    class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4"
+    aria-label="Primary navigation"
+  >
+    <a
+      href="/"
+      class="text-2xl font-black uppercase tracking-tighter"
+      aria-label="Pasha Archive home"
+    >
       Pasha Archive
     </a>
 
@@ -32,7 +40,9 @@ const navItems = [
     <button
       id="menu-btn"
       class="md:hidden flex items-center justify-center"
-      aria-label="Open Menu"
+      aria-label="Open menu"
+      aria-controls="mobile-menu"
+      aria-expanded="false"
     >
       <span class="material-symbols-outlined text-3xl">menu</span>
     </button>
@@ -51,7 +61,7 @@ const navItems = [
       Pasha Archive
     </span>
 
-    <button id="close-menu">
+    <button id="close-menu" aria-label="Close menu">
       <span class="material-symbols-outlined text-3xl">close</span>
     </button>
   </div>
@@ -86,15 +96,18 @@ const navItems = [
 
   openBtn?.addEventListener("click", () => {
     menu?.classList.remove("translate-x-full");
+    openBtn?.setAttribute("aria-expanded", "true");
   });
 
   closeBtn?.addEventListener("click", () => {
     menu?.classList.add("translate-x-full");
+    openBtn?.setAttribute("aria-expanded", "false");
   });
 
   menu?.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", () => {
       menu?.classList.add("translate-x-full");
+      openBtn?.setAttribute("aria-expanded", "false");
     });
   });
 </script>

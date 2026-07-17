@@ -57,9 +57,35 @@ const { data: commentsRes } = await supabase
   });
 
 const comments = commentsRes ?? [];
+
+const memoryImage = memory.type === "Video" ? memory.thumbnail_url : memory.src;
+const description =
+  memory.description ||
+  `${memory.title} from Pasha Archive, the personal archive of Muhamad Dwi Pasha.`;
+const galleryItemSchema = {
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  "@id": `https://www.mdpashaaa.web.id/galleries/${memory.slug}#memory`,
+  name: memory.title,
+  description,
+  image: memoryImage,
+  url: `https://www.mdpashaaa.web.id/galleries/${memory.slug}`,
+  creator: {
+    "@type": "Person",
+    name: "Muhamad Dwi Pasha",
+    alternateName: ["Pasha", "mdpashaaa", "mdwipasha"],
+  },
+};
 ---
 
-<Layout title={`${memory.title}`}>
+<Layout
+  title={`${memory.title}`}
+  description={description}
+  canonicalPath={`/galleries/${memory.slug}`}
+  image={memoryImage}
+  type="article"
+  jsonLd={galleryItemSchema}
+>
   <Navbar />
 
   <main class="max-w-5xl mx-auto px-6 md:px-16 py-12">
@@ -101,12 +127,16 @@ const comments = commentsRes ?? [];
               <img
                 src={memory.thumbnail_url}
                 alt={memory.title}
+                loading="lazy"
+                decoding="async"
                 class="w-full aspect-square object-cover mb-4"
               />
             ) : (
               <img
                 src={memory.src}
                 alt={memory.title}
+                loading="lazy"
+                decoding="async"
                 class="w-full aspect-square object-cover mb-4"
               />
             )

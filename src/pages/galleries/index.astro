@@ -62,9 +62,17 @@ const memories = (memoriesData || []).map((memory) => ({
     tags: tagsByMemoryId.get(memory.id) || [],
     people: peopleByMemoryId.get(memory.id) || [],
 }));
+
+const description =
+    "Browse the gallery of memories in Pasha Archive, a personal digital archive by Muhamad Dwi Pasha.";
 ---
 
-<Layout title="Gallery">
+<Layout
+    title="Gallery"
+    description={description}
+    canonicalPath="/galleries"
+    keywords="Pasha Archive gallery, Muhamad Dwi Pasha memories, mdpashaaa"
+>
     <Navbar />
 
     <div class="grain-overlay"></div>

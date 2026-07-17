@@ -56,12 +56,16 @@ export default function GalleryCard({ memory, index = 0 }) {
               <img
                 src={memory.thumbnail_url}
                 alt={memory.title}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
               />
             ) : (
               <img
                 src={memory.src}
                 alt={memory.title}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
               />
             )}

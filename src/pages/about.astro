@@ -1,0 +1,84 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+import { SITE } from "../config/seo";
+
+const description =
+  "Muhamad Dwi Pasha is an Indonesia-based Web Developer and Digital Analytics QA behind Pasha, mdpashaaa, and mdwipasha.";
+---
+
+<Layout
+  title="About Muhamad Dwi Pasha"
+  description={description}
+  canonicalPath="/about"
+  keywords="Muhamad Dwi Pasha, Pasha, mdpashaaa, mdwipasha, Web Developer Indonesia, Digital Analytics QA"
+>
+  <Navbar />
+
+  <main class="w-full px-6 md:px-16 py-12 md:py-24">
+    <article class="max-w-4xl mx-auto">
+      <header class="border-b-2 border-black pb-8 mb-10">
+        <span
+          class="inline-block bg-[#F6D1D8] border-2 border-black px-5 py-2 font-bold uppercase tracking-[0.16em] mb-6"
+        >
+          About
+        </span>
+
+        <h1 class="text-5xl md:text-7xl font-black uppercase leading-tight">
+          Muhamad Dwi Pasha
+        </h1>
+      </header>
+
+      <section aria-labelledby="about-introduction" class="space-y-6">
+        <h2 id="about-introduction" class="sr-only">Introduction</h2>
+        <p class="text-lg md:text-xl leading-relaxed text-[#444748] max-w-3xl">
+          I am Web Developer and Digital Analytics QA focused
+          on building useful web experiences and making digital measurement more
+          reliable.
+        </p>
+      </section>
+
+      <nav
+        aria-label="Muhamad Dwi Pasha social links"
+        class="mt-10 flex flex-wrap gap-4"
+      >
+        <a
+          href={SITE.socials.github}
+          class="neo-button bg-[#DBE9FF] px-6 py-3 font-bold uppercase text-sm"
+          target="_blank"
+          rel="me noopener noreferrer"
+          aria-label="Muhamad Dwi Pasha on GitHub as mdwipasha"
+        >
+          GitHub
+        </a>
+        <a
+          href={SITE.socials.instagram}
+          class="neo-button bg-[#F6D1D8] px-6 py-3 font-bold uppercase text-sm"
+          target="_blank"
+          rel="me noopener noreferrer"
+          aria-label="Muhamad Dwi Pasha on Instagram as mdpashaaa"
+        >
+          Instagram
+        </a>
+        <a
+          href={SITE.socials.linkedin}
+          class="neo-button bg-[#0077B5] px-6 py-3 font-bold uppercase text-sm"
+          target="_blank"
+          rel="me noopener noreferrer"
+          aria-label="Muhamad Dwi Pasha on LinkedIn as mdwipasha"
+        >
+          Linkedin
+        </a>
+      </nav>
+
+      <section
+        aria-labelledby="about-links"
+        class="mt-14 border-t-2 border-black pt-8"
+      >
+      </section>
+    </article>
+  </main>
+
+  <Footer />
+</Layout>

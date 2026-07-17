@@ -4,7 +4,14 @@ import AdminLogin from "../../components/Admin/AdminLogin";
 import Footer from "../../components/Footer.astro";
 ---
 
-<Layout title="Admin">
+<Layout
+  title="Admin"
+  description="Private admin area for Pasha Archive."
+  canonicalPath="/admin"
+  robots="noindex, nofollow"
+>
+  <main>
   <AdminLogin client:load />
+  </main>
   <Footer />
 </Layout>

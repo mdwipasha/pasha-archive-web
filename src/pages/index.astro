@@ -7,14 +7,24 @@ import RecentArchive from "../components/RecentArchive.astro";
 import MemoriesMap from "../components/MemoriesMap";
 import SubmitPageCTA from "../components/SubmitPageCTA.astro";
 import Footer from "../components/Footer.astro";
+
+const description =
+  "Pasha Archive is the personal digital archive of Muhamad Dwi Pasha, known as Pasha, mdpashaaa, and mdwipasha.";
 ---
 
-<Layout title="Home">
+<Layout
+  title="Pasha Archive"
+  description={description}
+  canonicalPath="/"
+  keywords="Pasha Archive, Muhamad Dwi Pasha, Pasha, mdpashaaa, mdwipasha"
+>
   <Navbar />
 
-  <Hero />
-  <RecentArchive />
-  <MemoriesMap client:only />
-  <SubmitPageCTA />
+  <main>
+    <Hero />
+    <RecentArchive />
+    <MemoriesMap client:only />
+    <SubmitPageCTA />
+  </main>
   <Footer />
 </Layout>

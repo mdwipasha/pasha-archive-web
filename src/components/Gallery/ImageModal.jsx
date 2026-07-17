@@ -139,6 +139,8 @@ export default function ImageModal({ memory, onClose }) {
               alt={memory.title}
               className="w-full h-auto border-2 border-black contrast-125"
               src={memory.src}
+              loading="lazy"
+              decoding="async"
             />
           </div>
 

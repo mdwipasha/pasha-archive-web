@@ -109,6 +109,8 @@ function makeMemoryIcon(memory, color, count = 1) {
       }
         <img
           src="${memory.type === "Video" ? memory.thumbnail_url : memory.image}"
+          alt="${memory.title || "Pasha Archive memory"}"
+          loading="lazy"
           style="width:100%;height:52px;object-fit:cover;display:block;border-bottom:2px solid #000;"
         />
         <div style="
@@ -225,6 +227,8 @@ function MemoryCard({ memory, index, accent, onClick }) {
       <img
         src={memory.type === "Video" ? memory.thumbnail_url : memory.image}
         alt={memory.title}
+        loading="lazy"
+        decoding="async"
         style={{
           width: "100%",
           height: 100,
@@ -319,6 +323,8 @@ function Lightbox({ memory, city, onClose }) {
           <img
             src={memory.image}
             alt={memory.title}
+            loading="lazy"
+            decoding="async"
             style={{
               width: "100%",
               maxHeight: 380,
