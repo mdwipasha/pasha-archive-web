@@ -87,7 +87,7 @@ function RequestMiniMap({ lat, lng }) {
             display:flex;align-items:center;justify-content:center;
             font-size:12px;line-height:1;
             transform:translate(-50%,-100%);
-          ">📍</div>`,
+          "><svg width="24" height="32" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1a9 9 0 0 0-9 9c0 6.75 9 21 9 21s9-14.25 9-21a9 9 0 0 0-9-9Z" fill="#FED74C" stroke="#111" stroke-width="2"/><circle cx="12" cy="10" r="3" fill="#111"/></svg></div>`,
           iconSize: [0, 0],
           iconAnchor: [0, 0],
           className: "",
@@ -350,7 +350,7 @@ export default function MemoryRequestDetailModal({ request, onClose, onRefresh }
               e.currentTarget.style.color = "#aaa";
             }}
           >
-            ✕
+            Close
           </button>
         </div>
 
@@ -370,7 +370,7 @@ export default function MemoryRequestDetailModal({ request, onClose, onRefresh }
                 boxShadow: `3px 3px 0px ${C.black}`,
               }}
             >
-              ⚠️ {errorMsg}
+              Error: {errorMsg}
             </div>
           )}
 
@@ -449,7 +449,7 @@ export default function MemoryRequestDetailModal({ request, onClose, onRefresh }
                 }}
               >
                 <h4 style={{ margin: "0 0 8px 0", fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>
-                  👤 Contributor Info
+                  Contributor Info
                 </h4>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, lineHeight: 1.5 }}>
                   <strong>Name:</strong> {request.contributor_name} <br />
@@ -470,7 +470,7 @@ export default function MemoryRequestDetailModal({ request, onClose, onRefresh }
                 }}
               >
                 <h4 style={{ margin: "0 0 4px 0", fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>
-                  📝 Memory details
+                  Memory details
                 </h4>
 
                 <div>
@@ -503,7 +503,7 @@ export default function MemoryRequestDetailModal({ request, onClose, onRefresh }
                 {request.location && (
                   <div>
                     <label style={{ fontSize: 10, fontWeight: 700, color: C.outlineVariant, textTransform: "uppercase", display: "block" }}>Location Name</label>
-                    <span style={{ fontSize: 12, fontWeight: 600 }}>📍 {request.location}</span>
+                    <span style={{ fontSize: 12, fontWeight: 600 }}>Location: {request.location}</span>
                   </div>
                 )}
 
@@ -533,7 +533,7 @@ export default function MemoryRequestDetailModal({ request, onClose, onRefresh }
                   }}
                 >
                   <h4 style={{ margin: "0 0 8px 0", fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>
-                    ❌ Rejection Note
+                    Rejection Note
                   </h4>
                   <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
                     {request.admin_note}
@@ -657,7 +657,7 @@ export default function MemoryRequestDetailModal({ request, onClose, onRefresh }
                   onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.transform = "translate(3px,3px)"; e.currentTarget.style.boxShadow = "none"; } }}
                   onMouseLeave={(e) => { if (!loading) { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = `4px 4px 0px ${C.black}`; } }}
                 >
-                  {loading ? "Approving…" : "✓ Approve & Publish"}
+                  {loading ? "Approving…" : "Approve & Publish"}
                 </button>
                 <button
                   onClick={() => setShowRejectForm(true)}
@@ -680,7 +680,7 @@ export default function MemoryRequestDetailModal({ request, onClose, onRefresh }
                   onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.transform = "translate(3px,3px)"; e.currentTarget.style.boxShadow = "none"; } }}
                   onMouseLeave={(e) => { if (!loading) { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = `4px 4px 0px ${C.black}`; } }}
                 >
-                  ✕ Reject Submission
+                  Reject Submission
                 </button>
               </div>
             )}

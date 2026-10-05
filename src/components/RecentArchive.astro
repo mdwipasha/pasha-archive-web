@@ -1,10 +1,11 @@
 ---
 import { supabase } from "../lib/supabase";
+import { getOptimizedImageUrl } from "../lib/media";
 
 // Fetch up to 3 featured memories, sorted by year descending
 const { data: featuredMemories } = await supabase
   .from("memories")
-  .select("*")
+  .select("id, title, slug, type, src, thumbnail_url, date, year")
   .eq("featured", true)
   .order("year", { ascending: false })
   .limit(3);
@@ -43,7 +44,10 @@ if (memoryIds.length > 0) {
 
 const memories = (featuredMemories || []).map((memory) => ({
   ...memory,
-  image: memory.type === "Video" ? memory.thumbnail_url : memory.src,
+  image: getOptimizedImageUrl(
+    memory.type === "Video" ? memory.thumbnail_url : memory.src,
+    { width: 1440, height: 1000 },
+  ),
   tags: tagsByMemoryId.get(memory.id) || [],
 }));
 

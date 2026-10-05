@@ -14,6 +14,7 @@ import React, {
   useMemo,
 } from "react";
 import { supabase } from "../lib/supabase";
+import { getOptimizedImageUrl } from "../lib/media";
 
 /* ─── Config ─── */
 const ZOOM_THRESHOLD = 9; // below = city clusters, at/above = individual photo pins
@@ -108,7 +109,7 @@ function makeMemoryIcon(memory, color, count = 1) {
         : ""
       }
         <img
-          src="${memory.type === "Video" ? memory.thumbnail_url : memory.image}"
+          src="${getOptimizedImageUrl(memory.type === "Video" ? memory.thumbnail_url : memory.image, { width: 160, height: 120 })}"
           alt="${memory.title || "Pasha Archive memory"}"
           loading="lazy"
           style="width:100%;height:52px;object-fit:cover;display:block;border-bottom:2px solid #000;"
@@ -225,7 +226,7 @@ function MemoryCard({ memory, index, accent, onClick }) {
         }}
       />
       <img
-        src={memory.type === "Video" ? memory.thumbnail_url : memory.image}
+        src={getOptimizedImageUrl(memory.type === "Video" ? memory.thumbnail_url : memory.image, { width: 360, height: 240 })}
         alt={memory.title}
         loading="lazy"
         decoding="async"
@@ -308,6 +309,8 @@ function Lightbox({ memory, city, onClose }) {
           <video
             src={memory.src}
             controls
+            controlsList="nodownload noremoteplayback"
+            disablePictureInPicture
             autoPlay
             playsInline
             style={{
@@ -913,8 +916,9 @@ export default function MemoriesMap() {
           <MapController flyTarget={flyTarget} onZoomChange={setZoom} />
 
           <TileLayer
-            attribution=""
-            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            maxZoom={19}
           />
 
           {/* City cluster markers — visible when zoomed out */}

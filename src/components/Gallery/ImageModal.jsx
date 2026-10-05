@@ -58,7 +58,7 @@ export default function ImageModal({ memory, onClose }) {
   async function loadStats() {
     const { data } = await supabase
       .from("memory_liked_visitors")
-      .select("*")
+      .select("id")
       .eq("memory_id", memory.id)
       .eq("visitor_id", visitorId)
       .maybeSingle();
@@ -77,7 +77,7 @@ export default function ImageModal({ memory, onClose }) {
 
     const { count } = await supabase
       .from("memory_comments")
-      .select("*", {
+      .select("id", {
         count: "exact",
         head: true,
       })

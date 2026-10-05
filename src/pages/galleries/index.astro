@@ -7,17 +7,22 @@ import Footer from "../../components/Footer.astro";
 import GallerySection from "../../components/Gallery/GallerySection.jsx";
 import { supabase } from "../../lib/supabase";
 
-const { data: memoriesData } = await supabase.from("memories").select("*");
-const { data: memoryTagsData } = await supabase
-    .from("memory_tags")
-    .select("memory_id, tag_id");
-const { data: tagsData } = await supabase.from("tags").select("id, tag");
-const { data: memoryPeopleData } = await supabase
-    .from("memory_people")
-    .select("memory_id, person_id");
-const { data: peopleData } = await supabase
-    .from("people")
-    .select("id, name, social_media");
+const [memoriesResult, memoryTagsResult, tagsResult, memoryPeopleResult, peopleResult] =
+    await Promise.all([
+        supabase
+            .from("memories")
+            .select("id, title, slug, type, src, thumbnail_url, description, date, year, location"),
+        supabase.from("memory_tags").select("memory_id, tag_id"),
+        supabase.from("tags").select("id, tag"),
+        supabase.from("memory_people").select("memory_id, person_id"),
+        supabase.from("people").select("id, name, social_media"),
+    ]);
+
+const { data: memoriesData } = memoriesResult;
+const { data: memoryTagsData } = memoryTagsResult;
+const { data: tagsData } = tagsResult;
+const { data: memoryPeopleData } = memoryPeopleResult;
+const { data: peopleData } = peopleResult;
 
 const memoryTags = /** @type {{memory_id:number, tag_id:number}[]} */ (
     memoryTagsData || []

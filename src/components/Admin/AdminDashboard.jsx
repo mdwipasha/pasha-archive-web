@@ -18,9 +18,9 @@ export default function AdminDashboard({ user }) {
   }
 
   const tabs = [
-    { key: "collection", label: "Collection", icon: "◈" },
-    { key: "add", label: "Add Memory", icon: "＋" },
-    { key: "requests", label: "Requests", icon: "📥" },
+    { key: "collection", label: "Collection" },
+    { key: "add", label: "Add Memory" },
+    { key: "requests", label: "Requests" },
   ];
 
   return (
@@ -72,7 +72,7 @@ export default function AdminDashboard({ user }) {
                 transform: "rotate(-1deg)",
               }}
             >
-              CMS
+              MDP
             </div>
             <div>
               <div
@@ -143,7 +143,7 @@ export default function AdminDashboard({ user }) {
                     }
                   }}
                 >
-                  {tab.icon} {tab.label}
+                  {tab.label}
                 </button>
               );
             })}
@@ -176,7 +176,7 @@ export default function AdminDashboard({ user }) {
               e.currentTarget.style.boxShadow = "3px 3px 0px #1c1b1b";
             }}
           >
-            ✕ Logout
+            Logout
           </button>
         </div>
 
@@ -206,7 +206,7 @@ export default function AdminDashboard({ user }) {
                   cursor: "pointer",
                 }}
               >
-                {tab.icon} {tab.label}
+                {tab.label}
               </button>
             );
           })}
@@ -261,7 +261,6 @@ export default function AdminDashboard({ user }) {
                 gap: 10,
               }}
             >
-              <span style={{ fontSize: 16, marginTop: 1, flexShrink: 0 }}>💡</span>
               <p
                 style={{
                   margin: 0,
@@ -356,7 +355,7 @@ export default function AdminDashboard({ user }) {
                   e.currentTarget.style.boxShadow = "4px 4px 0px #1c1b1b";
                 }}
               >
-                ＋ Add New
+                Add New
               </button>
             </div>
 

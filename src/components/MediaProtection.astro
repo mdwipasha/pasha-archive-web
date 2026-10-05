@@ -1,0 +1,48 @@
+<script is:inline>
+  const mediaSelector = "img, video";
+
+  const isMediaTarget = (target) =>
+    target instanceof Element && Boolean(target.closest(mediaSelector));
+
+  document.addEventListener(
+    "contextmenu",
+    (event) => {
+      if (isMediaTarget(event.target)) event.preventDefault();
+    },
+    { capture: true },
+  );
+
+  document.addEventListener(
+    "dragstart",
+    (event) => {
+      if (isMediaTarget(event.target)) event.preventDefault();
+    },
+    { capture: true },
+  );
+
+  const protectVideo = (video) => {
+    video.setAttribute("controlsList", "nodownload noremoteplayback");
+    video.disablePictureInPicture = true;
+    video.setAttribute("disableRemotePlayback", "");
+  };
+
+  document.querySelectorAll("video").forEach(protectVideo);
+  new MutationObserver((changes) => {
+    for (const change of changes) {
+      for (const node of change.addedNodes) {
+        if (!(node instanceof Element)) continue;
+        if (node.matches("video")) protectVideo(node);
+        node.querySelectorAll("video").forEach(protectVideo);
+      }
+    }
+  }).observe(document.documentElement, { childList: true, subtree: true });
+</script>
+
+<style is:global>
+  img,
+  video {
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+</style>

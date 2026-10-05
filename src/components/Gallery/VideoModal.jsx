@@ -65,7 +65,7 @@ export default function VideoModal({ memory, onClose }) {
   async function loadStats() {
     const { data } = await supabase
       .from("memory_liked_visitors")
-      .select("*")
+      .select("id")
       .eq("memory_id", memory.id)
       .eq("visitor_id", visitorId)
       .maybeSingle();
@@ -84,7 +84,7 @@ export default function VideoModal({ memory, onClose }) {
 
     const { count } = await supabase
       .from("memory_comments")
-      .select("*", {
+      .select("id", {
         count: "exact",
         head: true,
       })
@@ -228,6 +228,8 @@ export default function VideoModal({ memory, onClose }) {
             onPause={() => setPaused(true)}
             onPlay={() => setPaused(false)}
             controls
+            controlsList="nodownload noremoteplayback"
+            disablePictureInPicture
             autoPlay
             playsInline
             className="absolute inset-0 w-full h-full object-contain"

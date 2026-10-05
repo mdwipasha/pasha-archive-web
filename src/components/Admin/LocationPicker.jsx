@@ -81,7 +81,7 @@ export default function LocationPicker({ lat, lng, onConfirm, onClose }) {
         font-size:16px;line-height:1;
         transform:translate(-50%,-100%);
         cursor:grab;
-      ">📍</div>`,
+      "><svg width="24" height="32" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1a9 9 0 0 0-9 9c0 6.75 9 21 9 21s9-14.25 9-21a9 9 0 0 0-9-9Z" fill="#FED74C" stroke="#1c1b1b" stroke-width="2"/><circle cx="12" cy="10" r="3" fill="#1c1b1b"/></svg></div>`,
       iconSize: [0, 0],
       iconAnchor: [0, 0],
       className: "",
@@ -276,7 +276,7 @@ export default function LocationPicker({ lat, lng, onConfirm, onClose }) {
             onMouseEnter={(e) => { e.currentTarget.style.background = "#333"; e.currentTarget.style.color = "#fff"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#aaa"; }}
           >
-            ✕
+            Close
           </button>
         </div>
 
@@ -334,7 +334,7 @@ export default function LocationPicker({ lat, lng, onConfirm, onClose }) {
                 flexShrink: 0,
               }}
             >
-              ✕ Clear
+              Clear
             </button>
           )}
 
@@ -390,7 +390,7 @@ export default function LocationPicker({ lat, lng, onConfirm, onClose }) {
                 margin: 0,
               }}
             >
-              ⚠ {mapError}
+              Map error: {mapError}
             </p>
           </div>
         ) : (
@@ -459,7 +459,7 @@ export default function LocationPicker({ lat, lng, onConfirm, onClose }) {
                 opacity: hasCoords ? 1 : 0.5,
               }}
             >
-              ✓ Confirm Location
+              Confirm Location
             </button>
           </div>
         </div>

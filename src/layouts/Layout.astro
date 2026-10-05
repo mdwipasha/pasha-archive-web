@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { SITE, getAbsoluteUrl, personSchema } from "../config/seo";
+import MediaProtection from "../components/MediaProtection.astro";
 
 const {
   title,
@@ -67,5 +68,6 @@ const structuredData = [personSchema, jsonLd].filter(Boolean);
     class="min-h-screen bg-[#F3EFE6] text-[#111111] font-sans overflow-x-hidden"
   >
     <slot />
+    <MediaProtection />
   </body>
 </html>

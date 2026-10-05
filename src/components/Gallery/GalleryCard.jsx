@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import GalleryModal from "./GalleryModal";
+import { getOptimizedImageUrl } from "../../lib/media";
 
 export default function GalleryCard({ memory, index = 0 }) {
   const [open, setOpen] = useState(false);
@@ -54,7 +55,7 @@ export default function GalleryCard({ memory, index = 0 }) {
           >
             {memory.type === "Video" ? (
               <img
-                src={memory.thumbnail_url}
+                src={getOptimizedImageUrl(memory.thumbnail_url, { width: 720, height: 900 })}
                 alt={memory.title}
                 loading="lazy"
                 decoding="async"
@@ -62,7 +63,7 @@ export default function GalleryCard({ memory, index = 0 }) {
               />
             ) : (
               <img
-                src={memory.src}
+                src={getOptimizedImageUrl(memory.src, { width: 720, height: 900 })}
                 alt={memory.title}
                 loading="lazy"
                 decoding="async"

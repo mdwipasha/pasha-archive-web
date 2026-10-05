@@ -187,7 +187,7 @@ function PickFromMemoryModal({ open, onClose, onPick }) {
               lineHeight: 1,
             }}
           >
-            ✕
+            Close
           </button>
         </div>
 
@@ -301,7 +301,7 @@ function PickFromMemoryModal({ open, onClose, onPick }) {
                         textOverflow: "ellipsis",
                       }}
                     >
-                      📍 {m.location}
+                      Location: {m.location}
                     </div>
                   )}
                 </div>
@@ -506,7 +506,7 @@ function PickDateFromMemoryModal({ open, onClose, onPick, excludeId = null }) {
               lineHeight: 1,
             }}
           >
-            ✕
+            Close
           </button>
         </div>
 
@@ -612,7 +612,7 @@ function PickDateFromMemoryModal({ open, onClose, onPick, excludeId = null }) {
                         textOverflow: "ellipsis",
                       }}
                     >
-                      📍 {m.location}
+                      Location: {m.location}
                     </div>
                   )}
                 </div>
@@ -859,7 +859,7 @@ function ManageModal({
 
         <div style={{ display: "flex", borderBottom: `2px solid ${C.black}` }}>
           <button style={tabBtn("people")} onClick={() => { setTab("people"); setError(null); }}>
-            👤 People {people.length > 0 && `(${people.length})`}
+            People {people.length > 0 && `(${people.length})`}
           </button>
           <button style={tabBtn("tags")} onClick={() => { setTab("tags"); setError(null); }}>
             # Tags {tags.length > 0 && `(${tags.length})`}
@@ -990,7 +990,7 @@ function ManageModal({
                             }}
                             title="Save"
                           >
-                            ✓
+                            Save
                           </button>
                           <button
                             onClick={cancelEdit}
@@ -1006,7 +1006,7 @@ function ManageModal({
                             }}
                             title="Cancel"
                           >
-                            ✕
+                            Cancel
                           </button>
                         </div>
                       </div>
@@ -1052,7 +1052,7 @@ function ManageModal({
                             }}
                             title="Edit"
                           >
-                            ✏
+                            Edit
                           </button>
                           <button
                             onClick={() => deletePerson(p.id, p.name)}
@@ -1220,24 +1220,24 @@ export default function MemoryForm({ onSaved }) {
   }, []);
 
   async function loadTags() {
-    const { data } = await supabase.from("tags").select("*").order("tag");
+    const { data } = await supabase.from("tags").select("id, tag").order("tag");
     setTags(data || []);
   }
 
   async function loadPeople() {
-    const { data } = await supabase.from("people").select("*").order("name");
+    const { data } = await supabase.from("people").select("id, name").order("name");
     setPeople(data || []);
   }
 
   async function reloadTags() {
-    const { data } = await supabase.from("tags").select("*").order("tag");
+    const { data } = await supabase.from("tags").select("id, tag").order("tag");
     const fresh = data || [];
     setTags(fresh);
     setSelectedTags((prev) => prev.filter((id) => fresh.some((t) => t.id === id)));
   }
 
   async function reloadPeople() {
-    const { data } = await supabase.from("people").select("*").order("name");
+    const { data } = await supabase.from("people").select("id, name").order("name");
     const fresh = data || [];
     setPeople(fresh);
     setSelectedPeople((prev) => prev.filter((id) => fresh.some((p) => p.id === id)));
@@ -1288,18 +1288,44 @@ export default function MemoryForm({ onSaved }) {
     setLongitude(String(lng));
     // Auto-fill location text only when the field is currently empty
     if (memLoc && !location.trim()) setLocation(memLoc);
-    showToast("Coordinates copied from memory ✓");
+    showToast("Coordinates copied from memory");
   }
 
   // ── Pick date from memory handler ─────────────────────────────────────────
   function handlePickDateFromMemory({ date: memDate }) {
     setDate(memDate);
-    showToast("Date copied from memory ✓");
+    showToast("Date copied from memory");
+  }
+
+  async function hasFeaturedSlot() {
+    const { count, error } = await supabase
+      .from("memories")
+      .select("id", { count: "exact", head: true })
+      .eq("featured", true);
+
+    if (error) {
+      showToast("Could not verify the featured limit.", "error");
+      return false;
+    }
+    if ((count || 0) >= 3) {
+      showToast("Only 3 memories can be featured at one time.", "error");
+      return false;
+    }
+    return true;
+  }
+
+  async function toggleFeatured() {
+    if (featured) {
+      setFeatured(false);
+      return;
+    }
+    if (await hasFeaturedSlot()) setFeatured(true);
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (!file) { showToast("Please select an image first.", "error"); return; }
+    if (featured && !(await hasFeaturedSlot())) return;
     setLoading(true);
 
     const yearFolder = date ? new Date(date).getFullYear() : "unknown";
@@ -1406,7 +1432,7 @@ export default function MemoryForm({ onSaved }) {
             maxWidth: 320,
           }}
         >
-          <span>{toast.type === "error" ? "✕" : "✓"}</span>
+          <span>{toast.type === "error" ? "Error" : "Success"}</span>
           {toast.msg}
         </div>
       )}
@@ -1500,7 +1526,7 @@ export default function MemoryForm({ onSaved }) {
               onMouseEnter={(e) => { e.currentTarget.style.transform = "translate(2px,2px)"; e.currentTarget.style.boxShadow = "none"; }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = `2px 2px 0px ${C.black}`; }}
             >
-              📅 From Memory
+              From Memory
             </button>
           </div>
         </div>
@@ -1525,7 +1551,7 @@ export default function MemoryForm({ onSaved }) {
             <label style={labelStyle}>Featured</label>
             <button
               type="button"
-              onClick={() => setFeatured(!featured)}
+              onClick={toggleFeatured}
               style={{
                 border: `2px solid ${C.black}`,
                 background: featured ? C.yellow : C.surface,
@@ -1559,7 +1585,7 @@ export default function MemoryForm({ onSaved }) {
                 }}
               >
                 {featured && (
-                  <span style={{ color: C.yellow, fontSize: 10, fontWeight: 900, lineHeight: 1 }}>✓</span>
+                  <span style={{ color: C.yellow, fontSize: 10, fontWeight: 900, lineHeight: 1 }}>Selected</span>
                 )}
               </span>
               {featured ? "⭐ Featured" : "Mark as Featured"}
@@ -1653,7 +1679,7 @@ export default function MemoryForm({ onSaved }) {
               onMouseEnter={(e) => { e.currentTarget.style.transform = "translate(2px,2px)"; e.currentTarget.style.boxShadow = "none"; }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = `3px 3px 0px ${C.black}`; }}
             >
-              📍 From Memory
+              From Memory
             </button>
 
             {hasCoords && (
@@ -1684,7 +1710,7 @@ export default function MemoryForm({ onSaved }) {
                   }}
                   title="Clear coordinates"
                 >
-                  ✕
+                  Clear
                 </button>
               </>
             )}
@@ -1729,7 +1755,7 @@ export default function MemoryForm({ onSaved }) {
                 gap: 5,
               }}
             >
-              ⚙ Manage
+              Manage
             </button>
           </div>
 
@@ -1759,7 +1785,6 @@ export default function MemoryForm({ onSaved }) {
                     }
                     style={chipStyle(active, C.blue)}
                   >
-                    {active ? "✓ " : ""}
                     {person.name}
                   </button>
                 );
@@ -1792,7 +1817,7 @@ export default function MemoryForm({ onSaved }) {
                 gap: 5,
               }}
             >
-              ⚙ Manage
+              Manage
             </button>
           </div>
 
@@ -1822,7 +1847,6 @@ export default function MemoryForm({ onSaved }) {
                     }
                     style={chipStyle(active, C.yellow)}
                   >
-                    {active ? "✓ " : ""}
                     {tag.tag}
                   </button>
                 );

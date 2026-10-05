@@ -182,25 +182,26 @@ body::before {
 }
 
 .masonry-grid {
-  column-count: 1;
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
   column-gap: 24px;
+  row-gap: 32px;
 }
 
 @media (min-width: 768px) {
   .masonry-grid {
-    column-count: 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 1024px) {
   .masonry-grid {
-    column-count: 3;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 .masonry-item {
-  break-inside: avoid;
-  margin-bottom: 32px;
+  min-width: 0;
 }
 
 .grain-overlay {

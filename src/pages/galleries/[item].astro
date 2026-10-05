@@ -9,7 +9,7 @@ import { supabase } from "../../lib/supabase";
 const { item } = Astro.params;
 const { data, error } = await supabase
   .from("memories")
-  .select("*")
+  .select("id, title, slug, type, src, thumbnail_url, description, date, year, location")
   .eq("slug", item)
   .maybeSingle();
 
@@ -17,26 +17,28 @@ if (error || !data) {
   return Astro.redirect("/404");
 }
 
-const { data: memoryTagsData } = await supabase
-  .from("memory_tags")
-  .select("tag_id")
-  .eq("memory_id", data.id);
-const tagIds = (memoryTagsData || []).map((row) => row.tag_id);
-const { data: tagsData } = tagIds.length
-  ? await supabase.from("tags").select("id, tag").in("id", tagIds)
-  : { data: [] };
+const [memoryTagsResult, memoryPeopleResult, commentsResult] = await Promise.all([
+  supabase.from("memory_tags").select("tag_id").eq("memory_id", data.id),
+  supabase.from("memory_people").select("person_id").eq("memory_id", data.id),
+  supabase
+    .from("memory_comments")
+    .select("id, memory_id, username, comment, created_at, parent_id")
+    .eq("memory_id", data.id)
+    .order("created_at", { ascending: false }),
+]);
 
-const { data: memoryPeopleData } = await supabase
-  .from("memory_people")
-  .select("person_id")
-  .eq("memory_id", data.id);
+const { data: memoryTagsData } = memoryTagsResult;
+const tagIds = (memoryTagsData || []).map((row) => row.tag_id);
+const { data: memoryPeopleData } = memoryPeopleResult;
 const personIds = (memoryPeopleData || []).map((row) => row.person_id);
-const { data: peopleData } = personIds.length
-  ? await supabase
-      .from("people")
-      .select("id, name, social_media")
-      .in("id", personIds)
-  : { data: [] };
+const [{ data: tagsData }, { data: peopleData }] = await Promise.all([
+  tagIds.length
+    ? supabase.from("tags").select("id, tag").in("id", tagIds)
+    : Promise.resolve({ data: [] }),
+  personIds.length
+    ? supabase.from("people").select("id, name, social_media").in("id", personIds)
+    : Promise.resolve({ data: [] }),
+]);
 
 const memory = {
   ...data,
@@ -48,15 +50,7 @@ const memory = {
   })),
 };
 
-const { data: commentsRes } = await supabase
-  .from("memory_comments")
-  .select("id, memory_id, username, comment, created_at, parent_id")
-  .eq("memory_id", data.id)
-  .order("created_at", {
-    ascending: false,
-  });
-
-const comments = commentsRes ?? [];
+const comments = commentsResult.data ?? [];
 
 const memoryImage = memory.type === "Video" ? memory.thumbnail_url : memory.src;
 const description =

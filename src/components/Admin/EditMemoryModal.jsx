@@ -125,7 +125,7 @@ function Chip({ label, selected, accent = C.yellow, onClick }) {
       }}
     >
       {selected && (
-        <span style={{ fontSize: 9, fontWeight: 900, lineHeight: 1 }}>✓</span>
+        <span style={{ fontSize: 9, fontWeight: 900, lineHeight: 1 }}>Selected</span>
       )}
       {label}
     </button>
@@ -303,7 +303,7 @@ function PickFromMemoryModal({ open, onClose, onPick, excludeId = null }) {
               e.currentTarget.style.color = "#aaa";
             }}
           >
-            ✕
+            Close
           </button>
         </div>
 
@@ -416,7 +416,7 @@ function PickFromMemoryModal({ open, onClose, onPick, excludeId = null }) {
                         textOverflow: "ellipsis",
                       }}
                     >
-                      📍 {m.location}
+                      Location: {m.location}
                     </div>
                   )}
                 </div>
@@ -632,7 +632,7 @@ function PickDateFromMemoryModal({ open, onClose, onPick, excludeId = null }) {
               e.currentTarget.style.color = "#aaa";
             }}
           >
-            ✕
+            Close
           </button>
         </div>
 
@@ -737,7 +737,7 @@ function PickDateFromMemoryModal({ open, onClose, onPick, excludeId = null }) {
                         textOverflow: "ellipsis",
                       }}
                     >
-                      📍 {m.location}
+                      Location: {m.location}
                     </div>
                   )}
                 </div>
@@ -979,14 +979,14 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
     setLongitude(String(lng));
     // Auto-fill location text only when the field is currently empty
     if (memLoc && !location.trim()) setLocation(memLoc);
-    showToast("Coordinates copied ✓");
+    showToast("Coordinates copied");
   }
 
   // ── Pick date from memory handler ─────────────────────────────────────────
   function handlePickDateFromMemory({ date: memDate, year: memYear }) {
     setDate(memDate);
     if (memYear) setYear(memYear);
-    showToast("Date copied ✓");
+    showToast("Date copied");
   }
 
   // ── Toast ─────────────────────────────────────────────────────────────────
@@ -995,12 +995,39 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
     setTimeout(() => setToast(null), 3500);
   }
 
+  async function hasFeaturedSlot() {
+    const { count, error } = await supabase
+      .from("memories")
+      .select("id", { count: "exact", head: true })
+      .eq("featured", true)
+      .neq("id", memory.id);
+
+    if (error) {
+      showToast("Could not verify the featured limit.", "error");
+      return false;
+    }
+    if ((count || 0) >= 3) {
+      showToast("Only 3 memories can be featured at one time.", "error");
+      return false;
+    }
+    return true;
+  }
+
+  async function toggleFeatured() {
+    if (featured) {
+      setFeatured(false);
+      return;
+    }
+    if (await hasFeaturedSlot()) setFeatured(true);
+  }
+
   // ── Save ──────────────────────────────────────────────────────────────────
   async function handleSave() {
     if (!title.trim()) {
       showToast("Title is required.", "error");
       return;
     }
+    if (featured && !memory.featured && !(await hasFeaturedSlot())) return;
     setSaving(true);
 
     let updateData = {
@@ -1138,7 +1165,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
             gap: 8,
           }}
         >
-          {toast.kind === "error" ? "✕ " : "✓ "}
+          {toast.kind === "error" ? "Error: " : "Success: "}
           {toast.msg}
         </div>
       )}
@@ -1267,7 +1294,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
               e.currentTarget.style.color = "#aaa";
             }}
           >
-            ✕
+            Close
           </button>
         </div>
 
@@ -1371,7 +1398,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
                     transition: "all 0.15s ease",
                   }}
                 >
-                  <span style={{ fontSize: 28 }}>📷</span>
+                  <span style={{ fontSize: 12, fontWeight: 700 }}>Media preview</span>
                   <span
                     style={{
                       fontFamily: "'Space Grotesk', sans-serif",
@@ -1435,7 +1462,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
             {/* Featured toggle */}
             <div style={{ borderTop: `3px solid #333`, padding: "10px 12px" }}>
               <button
-                onClick={() => setFeatured(!featured)}
+                onClick={toggleFeatured}
                 style={{
                   width: "100%",
                   border: `2px solid ${featured ? C.yellow : "#444"}`,
@@ -1471,7 +1498,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
                     fontWeight: 900,
                   }}
                 >
-                  {featured && "✓"}
+                  {featured && "Selected"}
                 </span>
                 {featured ? "Featured" : "Mark featured"}
               </button>
@@ -1667,7 +1694,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
                   e.currentTarget.style.boxShadow = `2px 2px 0px ${C.black}`;
                 }}
               >
-                📅 From Memory
+                From Memory
               </button>
               {date && (
                 <button
@@ -1684,7 +1711,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
                   }}
                   title="Clear date"
                 >
-                  ✕
+                  Clear
                 </button>
               )}
             </div>
@@ -1806,7 +1833,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
                   e.currentTarget.style.boxShadow = `2px 2px 0px ${C.black}`;
                 }}
               >
-                📍 From Memory
+                From Memory
               </button>
 
               {hasCoords && (
@@ -1841,7 +1868,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
                     }}
                     title="Clear coordinates"
                   >
-                    ✕
+                    Clear
                   </button>
                 </>
               )}
@@ -2100,7 +2127,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
                   {uploading ? "Uploading…" : "Saving…"}
                 </>
               ) : (
-                "✓ Save changes"
+                "Save changes"
               )}
             </button>
           </div>

@@ -25,7 +25,7 @@ export default function MemoryRequestsPanel() {
     setLoading(true);
     const { data, error } = await supabase
       .from("memory_requests")
-      .select("*")
+      .select("id, title, description, type, src, thumbnail_url, date, location, latitude, longitude, contributor_name, contributor_email, status, admin_note, created_at")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -223,7 +223,6 @@ export default function MemoryRequestsPanel() {
             background: C.surfaceAlt,
           }}
         >
-          <span style={{ fontSize: 48 }}>📥</span>
           <p
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
