@@ -2,6 +2,11 @@
 import { supabase } from "../lib/supabase";
 import { getOptimizedImageUrl } from "../lib/media";
 
+// Per-memory focal points use stable database IDs, not editable titles/slugs.
+const FOCAL_POINTS_BY_MEMORY_ID = {
+  236: "center 25%",
+};
+
 // Fetch up to 3 featured memories, sorted by year descending
 const { data: featuredMemories } = await supabase
   .from("memories")
@@ -44,7 +49,7 @@ if (memoryIds.length > 0) {
 }
 
 const memories = (featuredMemories || []).map((memory) => {
-  const isPiece = memory.slug === "piece" || memory.title?.trim().toLowerCase() === "piece";
+  const focalPoint = FOCAL_POINTS_BY_MEMORY_ID[memory.id];
 
   return {
     ...memory,
@@ -54,10 +59,10 @@ const memories = (featuredMemories || []).map((memory) => {
         width: 1440,
         height: 1000,
         gravity: "center",
-        fit: isPiece ? "limit" : "fill",
+        fit: focalPoint ? "limit" : "fill",
       },
     ),
-    focalPoint: isPiece ? "center 30%" : "center",
+    focalPoint: focalPoint || "center",
     tags: tagsByMemoryId.get(memory.id) || [],
   };
 });
