@@ -1196,6 +1196,7 @@ export default function MemoryForm({ onSaved }) {
   const [longitude, setLongitude] = useState("");
   const [date, setDate] = useState("");
   const [featured, setFeatured] = useState(false);
+  const [visibility, setVisibility] = useState("public");
   const [type, setType] = useState("Photo");
 
   const [tags, setTags] = useState([]);
@@ -1358,7 +1359,8 @@ export default function MemoryForm({ onSaved }) {
         src: cloudinary.secure_url,
         cloudinary_public_id: cloudinary.public_id,
         thumbnail_url: thumbnail,
-        featured,
+        featured: visibility === "public" && featured,
+        visibility,
       })
       .select()
       .single();
@@ -1385,6 +1387,7 @@ export default function MemoryForm({ onSaved }) {
     setLongitude("");
     setDate("");
     setFeatured(false);
+    setVisibility("public");
     setFile(null);
     setPreview(null);
     setSelectedTags([]);
@@ -1590,6 +1593,22 @@ export default function MemoryForm({ onSaved }) {
               </span>
               {featured ? "⭐ Featured" : "Mark as Featured"}
             </button>
+          </div>
+          <div>
+            <label style={labelStyle}>Visibility</label>
+            <select
+              value={visibility}
+              onChange={(e) => {
+                const nextVisibility = e.target.value;
+                setVisibility(nextVisibility);
+                if (nextVisibility === "private") setFeatured(false);
+              }}
+              style={{ ...inputStyle, cursor: "pointer" }}
+              aria-label="Memory visibility"
+            >
+              <option value="public">Public — visible on the website</option>
+              <option value="private">Private — admin only</option>
+            </select>
           </div>
         </div>
 

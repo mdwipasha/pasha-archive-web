@@ -813,6 +813,7 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
   const [src, setSrc] = useState(memory.src || "");
   const [thumbnailUrl, setThumbnailUrl] = useState(memory.thumbnail_url || "");
   const [featured, setFeatured] = useState(memory.featured || false);
+  const [visibility, setVisibility] = useState(memory.visibility || "public");
 
   // ── Upload / save state ───────────────────────────────────────────────────
   const [file, setFile] = useState(null);
@@ -1038,7 +1039,8 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
       date: date || null,
       year: year !== "" ? Number(year) : null,
       location,
-      featured,
+      featured: visibility === "public" && featured,
+      visibility,
       thumbnail_url: thumbnailUrl || null,
       latitude: latitude !== "" ? Number(latitude) : null,
       longitude: longitude !== "" ? Number(longitude) : null,
@@ -1723,6 +1725,21 @@ export default function EditMemoryModal({ memory, onClose, onSaved }) {
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="e.g. Bromo, East Java"
               />
+            </Field>
+            <Field label="Visibility">
+              <select
+                value={visibility}
+                onChange={(e) => {
+                  const nextVisibility = e.target.value;
+                  setVisibility(nextVisibility);
+                  if (nextVisibility === "private") setFeatured(false);
+                }}
+                style={{ ...inputBase, cursor: "pointer" }}
+                {...focusHandlers}
+              >
+                <option value="public">Public — visible on the website</option>
+                <option value="private">Private — admin only</option>
+              </select>
             </Field>
 
             {/* ── Coordinates ──────────────────────────────────────────────── */}

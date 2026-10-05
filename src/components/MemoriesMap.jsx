@@ -331,8 +331,9 @@ function Lightbox({ memory, city, onClose }) {
             style={{
               width: "100%",
               maxHeight: 380,
-              objectFit: "cover",
+              objectFit: "contain",
               display: "block",
+              background: "#111",
               borderBottom: "3px solid #000",
             }}
           />
@@ -703,7 +704,8 @@ export default function MemoriesMap() {
         longitude,
         year,
         date
-      `);
+      `)
+      .eq("visibility", "public");
 
     if (error) {
       console.error(error);

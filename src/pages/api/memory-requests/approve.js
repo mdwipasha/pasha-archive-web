@@ -102,6 +102,7 @@ export async function POST({ request }) {
         thumbnail_url: memRequest.thumbnail_url,
         latitude: memRequest.latitude,
         longitude: memRequest.longitude,
+        visibility: "public",
       });
 
     if (insertError) {

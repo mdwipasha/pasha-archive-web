@@ -11,7 +11,8 @@ const [memoriesResult, memoryTagsResult, tagsResult, memoryPeopleResult, peopleR
     await Promise.all([
         supabase
             .from("memories")
-            .select("id, title, slug, type, src, thumbnail_url, description, date, year, location"),
+            .select("id, title, slug, type, src, thumbnail_url, description, date, year, location")
+            .eq("visibility", "public"),
         supabase.from("memory_tags").select("memory_id, tag_id"),
         supabase.from("tags").select("id, tag"),
         supabase.from("memory_people").select("memory_id, person_id"),

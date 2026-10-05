@@ -1,6 +1,8 @@
 type ImageSize = {
   width: number;
   height?: number;
+  gravity?: "center" | "north";
+  fit?: "fill" | "limit";
 };
 
 /**
@@ -12,7 +14,9 @@ export function getOptimizedImageUrl(url: string | null | undefined, size: Image
     return url || "";
   }
 
-  const crop = size.height ? `,c_fill,h_${size.height}` : ",c_limit";
+  const crop = size.height && size.fit !== "limit"
+    ? `,c_fill,g_${size.gravity || "center"},h_${size.height}`
+    : ",c_limit";
   const transforms = `f_auto,q_auto,dpr_auto,w_${size.width}${crop}`;
   return url.replace("/upload/", `/upload/${transforms}/`);
 }

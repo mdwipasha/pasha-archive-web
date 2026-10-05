@@ -7,6 +7,7 @@ const { data: featuredMemories } = await supabase
   .from("memories")
   .select("id, title, slug, type, src, thumbnail_url, date, year")
   .eq("featured", true)
+  .eq("visibility", "public")
   .order("year", { ascending: false })
   .limit(3);
 
@@ -42,14 +43,24 @@ if (memoryIds.length > 0) {
   }
 }
 
-const memories = (featuredMemories || []).map((memory) => ({
-  ...memory,
-  image: getOptimizedImageUrl(
-    memory.type === "Video" ? memory.thumbnail_url : memory.src,
-    { width: 1440, height: 1000 },
-  ),
-  tags: tagsByMemoryId.get(memory.id) || [],
-}));
+const memories = (featuredMemories || []).map((memory) => {
+  const isPiece = memory.slug === "piece" || memory.title?.trim().toLowerCase() === "piece";
+
+  return {
+    ...memory,
+    image: getOptimizedImageUrl(
+      memory.type === "Video" ? memory.thumbnail_url : memory.src,
+      {
+        width: 1440,
+        height: 1000,
+        gravity: "center",
+        fit: isPiece ? "limit" : "fill",
+      },
+    ),
+    focalPoint: isPiece ? "center 30%" : "center",
+    tags: tagsByMemoryId.get(memory.id) || [],
+  };
+});
 
 const featured = memories[0] || null;
 const sideCards = memories.slice(1, 3);
@@ -132,6 +143,7 @@ const sideCards = memories.slice(1, 3);
                     loading="lazy"
                     decoding="async"
                     class="w-full h-[220px] object-cover rounded-xl"
+                    style={`object-position: ${memory.focalPoint};`}
                   />
                 </div>
 

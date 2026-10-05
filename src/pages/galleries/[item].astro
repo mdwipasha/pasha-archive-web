@@ -11,6 +11,7 @@ const { data, error } = await supabase
   .from("memories")
   .select("id, title, slug, type, src, thumbnail_url, description, date, year, location")
   .eq("slug", item)
+  .eq("visibility", "public")
   .maybeSingle();
 
 if (error || !data) {

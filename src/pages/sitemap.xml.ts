@@ -12,7 +12,11 @@ const escapeXml = (value: string) =>
     .replace(/'/g, "&apos;");
 
 export async function GET() {
-  const { data } = await supabase.from("memories").select("slug").not("slug", "is", null);
+  const { data } = await supabase
+    .from("memories")
+    .select("slug")
+    .eq("visibility", "public")
+    .not("slug", "is", null);
   const memoryPages = (data || []).map((memory) => `/galleries/${memory.slug}`);
   const urls = [...staticPages, ...memoryPages];
 
